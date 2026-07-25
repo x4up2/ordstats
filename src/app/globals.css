@@ -310,7 +310,7 @@ a {
 }
 
 .dashboard {
-  padding-top: 76px;
+  padding-top: 42px;
 }
 
 .collection-heading {
@@ -936,7 +936,7 @@ a {
   }
 
   .dashboard {
-    padding-top: 54px;
+    padding-top: 32px;
   }
 
   .dashboard-section {
@@ -3654,3 +3654,54 @@ a[href^="http://ord.net"]:hover {
     justify-self: end;
   }
 }
+
+/* ORDSTATS COLLECTION HOME LINK */
+
+.collection-home-link {
+  width: fit-content;
+  margin-bottom: 32px;
+  padding-bottom: 5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--border-strong);
+  color: var(--text-soft);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  transition:
+    color 150ms ease,
+    border-color 150ms ease;
+}
+
+.collection-home-link span {
+  font-size: 14px;
+  line-height: 1;
+  transition: transform 150ms ease;
+}
+
+.collection-home-link:hover {
+  border-color: var(--text);
+  color: var(--text);
+}
+
+.collection-home-link:hover span {
+  transform: translateX(-3px);
+}
+
+.pending-page .collection-home-link {
+  margin-bottom: 36px;
+}
+
+@media (max-width: 760px) {
+  .collection-home-link {
+    margin-bottom: 26px;
+  }
+
+  .pending-page .collection-home-link {
+    margin-bottom: 28px;
+  }
+}
+
