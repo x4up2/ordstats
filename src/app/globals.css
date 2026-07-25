@@ -803,7 +803,7 @@ a {
 .pending-page {
   flex: 1;
   min-height: 650px;
-  padding-block: 130px;
+  padding-bottom: 130px;
 }
 
 .pending-page > p:not(.eyebrow) {
@@ -1813,38 +1813,10 @@ body {
   background: #1d4d86;
 }
 
-.pending-process {
-  margin-top: 105px;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  border-top: 1px solid var(--border);
-  border-left: 1px solid var(--border);
-}
 
-.pending-process article {
-  min-height: 210px;
-  padding: 28px;
-  border-right: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-}
 
-.pending-process span {
-  color: var(--blue-label);
-  font-size: 11px;
-  font-weight: 700;
-}
 
-.pending-process h2 {
-  margin: 45px 0 12px;
-  font-size: 20px;
-}
 
-.pending-process p {
-  margin: 0;
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 1.6;
-}
 
 .collection-form button:disabled {
   cursor: wait;
@@ -1885,9 +1857,6 @@ body {
     flex-direction: column;
   }
 
-  .pending-process {
-    grid-template-columns: 1fr;
-  }
 }
 
 /* ORDstats WORDMARK */
@@ -3691,63 +3660,29 @@ a[href^="http://ord.net"]:hover {
   transform: translateX(-3px);
 }
 
-.pending-page .collection-home-link {
-  margin-bottom: 36px;
-}
 
 @media (max-width: 760px) {
   .collection-home-link {
     margin-bottom: 26px;
   }
 
-  .pending-page .collection-home-link {
-    margin-bottom: 28px;
-  }
 }
 
-/* ORDSTATS NON-INDEXED HOME PLACEMENT */
 
-.pending-page {
-  padding-top: 36px;
-  padding-bottom: 130px;
-}
+/* ORDSTATS NON-INDEXED PAGE */
 
 .pending-page > .collection-home-link {
   display: flex;
-  margin-bottom: 73px;
+}
+
+.pending-page .pending-status {
+  width: fit-content;
+  display: flex;
 }
 
 @media (max-width: 760px) {
   .pending-page {
-    padding-top: 28px;
     padding-bottom: 90px;
-  }
-
-  .pending-page > .collection-home-link {
-    margin-bottom: 58px;
-  }
-}
-
-/* ORDSTATS NON-INDEXED PAGE ALIGNMENT */
-
-.dashboard.pending-page {
-  padding-top: 38px;
-  padding-bottom: 130px;
-}
-
-.dashboard.pending-page > .collection-home-link {
-  display: flex;
-  margin-bottom: 30px;
-}
-
-@media (max-width: 760px) {
-  .dashboard.pending-page {
-    padding-top: 30px;
-    padding-bottom: 90px;
-  }
-
-  .dashboard.pending-page > .collection-home-link {
-    margin-bottom: 24px;
   }
 }
 
@@ -3756,4 +3691,3 @@ a[href^="http://ord.net"]:hover {
 html {
   scrollbar-gutter: stable;
 }
-

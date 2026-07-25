@@ -38,7 +38,7 @@ export default async function CollectionPage({
 
   if (!collection) {
     return (
-      <div className="site-frame">
+      <div className="site-frame dashboard-frame">
         <header className="site-header shell">
           <Link
             className="wordmark"
@@ -54,7 +54,7 @@ export default async function CollectionPage({
           </p>
         </header>
 
-        <main className="shell pending-page">
+        <main className="shell dashboard pending-page">
           <Link
             className="collection-home-link"
             href="/"
@@ -68,7 +68,9 @@ export default async function CollectionPage({
             No ORDstats snapshot
           </div>
 
-          <p className="eyebrow">Collection not indexed</p>
+          <p className="eyebrow">
+            Collection not indexed
+          </p>
 
           <h1>{humanizeSlug(slug)}</h1>
 
@@ -88,38 +90,12 @@ export default async function CollectionPage({
               Check collection on ord.net ↗
             </a>
 
-            <Link className="secondary-link" href="/#collections">
+            <Link
+              className="secondary-link"
+              href="/#collections"
+            >
               Browse indexed collections
             </Link>
-          </div>
-
-          <div className="pending-process">
-            <article>
-              <span>01</span>
-              <h2>Resolve</h2>
-              <p>
-                Verify the collection and retrieve its canonical
-                gallery inscription.
-              </p>
-            </article>
-
-            <article>
-              <span>02</span>
-              <h2>Index</h2>
-              <p>
-                Read current inscription locations from a local ord
-                index.
-              </p>
-            </article>
-
-            <article>
-              <span>03</span>
-              <h2>Publish</h2>
-              <p>
-                Store the resulting ownership snapshot in the public
-                ORDstats database.
-              </p>
-            </article>
           </div>
         </main>
       </div>
