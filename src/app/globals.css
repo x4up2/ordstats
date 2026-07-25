@@ -3673,6 +3673,7 @@ a[href^="http://ord.net"]:hover {
 
 .pending-page > .collection-home-link {
   display: flex;
+  transform: translateY(2px);
 }
 
 .pending-page .pending-status {
