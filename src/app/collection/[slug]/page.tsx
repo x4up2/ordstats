@@ -73,9 +73,9 @@ export default async function CollectionPage({
           <h1>{humanizeSlug(slug)}</h1>
 
           <p className="pending-description">
-            The ord.net collection URL is valid, but this collection
-            has not yet been processed by ORDstats. No ownership data
-            is currently stored in the public database.
+            ORDstats has no snapshot for this collection slug. The
+            collection may exist on ord.net, or the URL may be invalid.
+            In either case, it has not been indexed by ORDstats.
           </p>
 
           <div className="pending-actions">
@@ -85,7 +85,7 @@ export default async function CollectionPage({
               target="_blank"
               rel="noreferrer"
             >
-              View collection on ord.net ↗
+              Check collection on ord.net ↗
             </a>
 
             <Link className="secondary-link" href="/#collections">
