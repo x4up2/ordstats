@@ -1,65 +1,159 @@
 import Image from "next/image";
+import Link from "next/link";
+import CollectionDirectory from "@/components/collection-directory";
+import { getPublicCollections } from "@/lib/collection-data";
 
-export default function Home() {
+export default async function Home() {
+  const collections = await getPublicCollections();
+
+  const activeCollections = collections.filter(
+    (collection) => collection.catalog_active,
+  );
+
+  /*
+   * Le fallback évite une page vide avant la première
+   * synchronisation du catalogue.
+   */
+  const displayedCollections =
+    activeCollections.length > 0
+      ? activeCollections
+      : collections;
+
+  const orderedCollections = [
+    ...displayedCollections,
+  ].sort((left, right) => {
+    const leftRank =
+      left.ord_rank_30d ?? Number.MAX_SAFE_INTEGER;
+
+    const rightRank =
+      right.ord_rank_30d ?? Number.MAX_SAFE_INTEGER;
+
+    if (leftRank !== rightRank) {
+      return leftRank - rightRank;
+    }
+
+    return left.name.localeCompare(right.name);
+  });
+
+  const directoryCollections = orderedCollections.map(
+    (collection) => {
+      const ownership =
+        collection.current_ownership.ownership;
+
+      const supply =
+        collection.current_ownership.supply;
+
+      const advanced =
+        collection.advanced_ownership;
+
+      return {
+        slug: collection.slug,
+        name: collection.name,
+        ordRank30d: collection.ord_rank_30d ?? null,
+        collectionType:
+          collection.collection_type ?? "collection",
+        latestBlockHeight:
+          collection.latest_block_height ?? null,
+        latestSnapshotAt:
+          collection.latest_snapshot_at ?? null,
+        imageUrl:
+          collection.image_url ??
+          `https://render.ord.net/v5/snapshots/${collection.source_id}/512.webp`,
+        circulatingSupply: supply.circulating,
+        burned: supply.burned,
+        holdingAddresses: ownership.holdingAddresses,
+        singleHolderRate: ownership.singleHolderRate,
+        giniCoefficient:
+          advanced?.giniCoefficient ?? null,
+        effectiveHolders:
+          advanced?.effectiveHolders ?? null,
+        top1SupplyShare:
+          advanced?.topHolderGroups.top1Percent.share ??
+          null,
+      };
+    },
+  );
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <div className="site-frame">
+      <header className="site-header shell">
+        <Link
+          className="wordmark"
+          href="/"
+          aria-label="ORDstats home"
+        >
+          <span className="wordmark-ord">ORD</span>
+          <span className="wordmark-stats">stats</span>
+        </Link>
+
+        <p className="header-label">
+          Ordinals ownership intelligence
+        </p>
+      </header>
+
+      <main>
+        <section className="catalog-hero shell">
+          <div className="catalog-hero-grid">
+            <div className="catalog-hero-copy">
+              <h1>
+                Inside Ordinals
+                <br />
+                ownership.
+              </h1>
+
+              <p className="catalog-hero-description">
+                ORDstats tracks the first 100 collections in the
+                rolling{" "}
+                <span className="ord-net-mark">ord.net</span>{" "}
+                30-day ranking and analyzes their ownership structure
+                every day from an independent local ord index.
+              </p>
+            </div>
+
+            <div
+              className="catalog-hero-art"
+              aria-hidden="true"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+              <Image
+                src="/ordstats-mark.png"
+                alt=""
+                width={512}
+                height={512}
+                priority
+              />
+            </div>
+          </div>
+        </section>
+
+        <section
+          className="collection-directory shell"
+          id="collections"
+        >
+          <div className="directory-heading">
+            <div>
+              <p className="eyebrow">Collection directory</p>
+              <h2>Indexed collections</h2>
+            </div>
+
+            <p>
+              Select a collection to open its complete ownership
+              report.
+            </p>
+          </div>
+
+          <CollectionDirectory
+            collections={directoryCollections}
+          />
+        </section>
       </main>
+
+      <footer className="site-footer shell">
+        <p>ORDstats</p>
+
+        <p>
+          Ownership · Distribution · On-chain data
+        </p>
+      </footer>
     </div>
   );
 }

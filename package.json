@@ -1,14 +1,24 @@
 {
-  "name": "ordpulse",
+  "name": "ordstats",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "snapshot:ownership": "node --env-file=.env.local scripts/snapshot-ownership.mjs",
+    "upload:snapshot": "node --env-file=.env.local scripts/upload-snapshot.mjs",
+    "index:collection": "node --env-file=.env.local scripts/index-collection.mjs",
+    "refresh:all": "node --env-file=.env.local scripts/refresh-all.mjs",
+    "catalog:update": "node scripts/update-top50-ordnet.mjs",
+    "catalog:index": "node --env-file=.env.local scripts/index-catalog.mjs",
+    "catalog:update:100": "node scripts/update-top100-ordnet.mjs && node --env-file=.env.local scripts/sync-catalog-ranking.mjs",
+    "catalog:sync": "node --env-file=.env.local scripts/sync-catalog-ranking.mjs",
+    "catalog:images": "node --env-file=.env.local scripts/sync-catalog-images.mjs"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.110.8",
     "next": "16.2.11",
     "react": "19.2.4",
     "react-dom": "19.2.4"
@@ -20,7 +30,12 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.11",
+    "playwright-core": "^1.61.1",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "allowScripts": {
+    "sharp@0.34.5": true,
+    "unrs-resolver@1.12.2": true
   }
 }

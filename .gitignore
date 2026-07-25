@@ -1,6 +1,4 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
+# Dependencies
 /node_modules
 /.pnp
 .pnp.*
@@ -10,32 +8,75 @@
 !.yarn/releases
 !.yarn/versions
 
-# testing
+# Testing
 /coverage
+/playwright-report/
+/test-results/
 
-# next.js
+# Next.js
 /.next/
 /out/
 
-# production
+# Production
 /build
 
-# misc
-.DS_Store
-*.pem
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
 
-# debug
+# Vercel
+.vercel
+
+# Environment files and secrets
+.env
+.env.*
+!.env.example
+
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Logs
+/logs/
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# Local generated and intermediate data
+/data/indexing/
+/data/ord-net-top-*-30d.json
+/data/ord-net-top-*-30d.txt
+/src/data/generated/
+/tmp/
 
-# vercel
-.vercel
+# Machine-specific automation
+/scripts/refresh-all-launchd.sh
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+# Backups and temporary editor files
+*.backup
+*.backup-*
+*.bak
+*.orig
+*.rej
+*.tmp
+*~
+*.swp
+*.swo
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Operating systems and editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Local AI coding instructions
+/AGENTS.md
+/CLAUDE.md
