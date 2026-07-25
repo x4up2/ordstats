@@ -3728,3 +3728,32 @@ a[href^="http://ord.net"]:hover {
   }
 }
 
+/* ORDSTATS NON-INDEXED PAGE ALIGNMENT */
+
+.dashboard.pending-page {
+  padding-top: 38px;
+  padding-bottom: 130px;
+}
+
+.dashboard.pending-page > .collection-home-link {
+  display: flex;
+  margin-bottom: 30px;
+}
+
+@media (max-width: 760px) {
+  .dashboard.pending-page {
+    padding-top: 30px;
+    padding-bottom: 90px;
+  }
+
+  .dashboard.pending-page > .collection-home-link {
+    margin-bottom: 24px;
+  }
+}
+
+/* ORDSTATS STABLE SCROLLBAR ALIGNMENT */
+
+html {
+  scrollbar-gutter: stable;
+}
+
