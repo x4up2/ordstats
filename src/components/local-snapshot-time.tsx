@@ -24,12 +24,13 @@ export default function LocalSnapshotTime({
       return;
     }
 
-    const formatter = new Intl.DateTimeFormat(undefined, {
+    const formatter = new Intl.DateTimeFormat("en-GB", {
       day: "2-digit",
       month: "short",
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
+      hour12: false,
     });
 
     setFormatted(formatter.format(date));
