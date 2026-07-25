@@ -55,6 +55,14 @@ export default async function CollectionPage({
         </header>
 
         <main className="shell pending-page">
+          <Link
+            className="collection-home-link"
+            href="/"
+          >
+            <span aria-hidden="true">←</span>
+            Home
+          </Link>
+
           <div className="pending-status">
             <span className="status-dot" />
             No ORDstats snapshot
@@ -546,6 +554,14 @@ export default async function CollectionPage({
       </header>
 
       <main className="shell dashboard">
+        <Link
+          className="collection-home-link"
+          href="/"
+        >
+          <span aria-hidden="true">←</span>
+          Home
+        </Link>
+
         <section className="collection-heading">
           <div className="collection-identity">
             <div className="collection-artwork">
