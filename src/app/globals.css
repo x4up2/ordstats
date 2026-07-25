@@ -3705,3 +3705,26 @@ a[href^="http://ord.net"]:hover {
   }
 }
 
+/* ORDSTATS NON-INDEXED HOME PLACEMENT */
+
+.pending-page {
+  padding-top: 36px;
+  padding-bottom: 130px;
+}
+
+.pending-page > .collection-home-link {
+  display: flex;
+  margin-bottom: 73px;
+}
+
+@media (max-width: 760px) {
+  .pending-page {
+    padding-top: 28px;
+    padding-bottom: 90px;
+  }
+
+  .pending-page > .collection-home-link {
+    margin-bottom: 58px;
+  }
+}
+
