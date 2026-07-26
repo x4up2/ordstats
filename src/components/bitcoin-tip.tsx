@@ -7,7 +7,7 @@ const BITCOIN_TIP_ADDRESS =
 
 export default function BitcoinTip() {
   const [copyStatus, setCopyStatus] = useState<
-    "idle" | "copied" | "error"
+    "idle" | "copied"
   >("idle");
 
   async function copyAddress() {
@@ -22,20 +22,14 @@ export default function BitcoinTip() {
         setCopyStatus("idle");
       }, 1800);
     } catch {
-      setCopyStatus("error");
-
-      window.setTimeout(() => {
-        setCopyStatus("idle");
-      }, 1800);
+      setCopyStatus("idle");
     }
   }
 
   const buttonLabel =
     copyStatus === "copied"
       ? "Copied"
-      : copyStatus === "error"
-        ? "Copy failed"
-        : "Copy address";
+      : "Copy address";
 
   const shortAddress =
     `${BITCOIN_TIP_ADDRESS.slice(0, 12)}…` +
@@ -58,7 +52,9 @@ export default function BitcoinTip() {
         onClick={copyAddress}
         aria-label="Copy the ORDstats Bitcoin tip address"
       >
-        {buttonLabel}
+        <span aria-live="polite">
+          {buttonLabel}
+        </span>
       </button>
     </div>
   );

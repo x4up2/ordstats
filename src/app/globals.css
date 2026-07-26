@@ -3820,6 +3820,8 @@ html {
 }
 
 .bitcoin-tip-button {
+  display: inline-grid;
+  place-items: center;
   padding: 6px 9px;
   border: 1px solid var(--border-strong);
   background: rgba(20, 52, 89, 0.22);
@@ -3830,6 +3832,16 @@ html {
   letter-spacing: 0.05em;
   text-transform: uppercase;
   cursor: pointer;
+}
+
+.bitcoin-tip-button::before,
+.bitcoin-tip-button span {
+  grid-area: 1 / 1;
+}
+
+.bitcoin-tip-button::before {
+  content: "Copy address";
+  visibility: hidden;
 }
 
 .bitcoin-tip-button:hover {
