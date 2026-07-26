@@ -204,15 +204,24 @@ function formatMetricValue(
   });
 }
 
-function formatDelta(
+function normalizeDelta(
   delta: number,
   metric: HistoryMetricDefinition,
 ) {
   const threshold =
     0.5 * 10 ** -metric.decimals;
 
+  return Math.abs(delta) < threshold
+    ? 0
+    : delta;
+}
+
+function formatDelta(
+  delta: number,
+  metric: HistoryMetricDefinition,
+) {
   const normalizedDelta =
-    Math.abs(delta) < threshold ? 0 : delta;
+    normalizeDelta(delta, metric);
 
   if (normalizedDelta === 0) {
     return "-";
@@ -232,12 +241,18 @@ function formatDelta(
   return `${signed}${metric.deltaSuffix}`;
 }
 
-function deltaTone(delta: number) {
-  if (delta > 0) {
+function deltaTone(
+  delta: number,
+  metric: HistoryMetricDefinition,
+) {
+  const normalizedDelta =
+    normalizeDelta(delta, metric);
+
+  if (normalizedDelta > 0) {
     return "positive";
   }
 
-  if (delta < 0) {
+  if (normalizedDelta < 0) {
     return "negative";
   }
 
@@ -702,9 +717,7 @@ export default function OwnershipHistory({
 
                 return (
                   <div
-                    className={`history-card history-${deltaTone(
-                      delta,
-                    )}`}
+                    className={`history-card history-${deltaTone(delta, metric)}`}
                     key={metric.key}
                   >
                     <span className="history-label">
@@ -798,9 +811,7 @@ export default function OwnershipHistory({
                       </div>
 
                       <small
-                        className={`history-chart-change history-chart-${deltaTone(
-                          delta,
-                        )}`}
+                        className={`history-chart-change history-chart-${deltaTone(delta, metric)}`}
                       >
                         {formatDelta(delta, metric)}
                       </small>
