@@ -399,6 +399,19 @@ export default async function CollectionPage({
       ]
     : [];
 
+  const bottom50SupplyShare =
+    advanced?.distributionThresholds?.bottom50Percent
+      .share ??
+    advanced?.lorenzCurve.find(
+      (point) => point.holdersShare === 50,
+    )?.supplyShare ??
+    null;
+
+  const holdersControlling50Share =
+    advanced?.distributionThresholds
+      ?.holdersControlling50Percent.holderShare ??
+    null;
+
   const lorenzPoints = advanced
     ? advanced.lorenzCurve
         .map(
@@ -915,18 +928,24 @@ export default async function CollectionPage({
 
                 <div className="lorenz-summary">
                   <div>
-                    <span>Gini</span>
+                    <span>Bottom 50% supply</span>
                     <strong>
-                      {advanced.giniCoefficient.toFixed(3)}
+                      {bottom50SupplyShare === null
+                        ? "—"
+                        : `${bottom50SupplyShare.toFixed(
+                            2,
+                          )}%`}
                     </strong>
                   </div>
 
                   <div>
-                    <span>Effective holders</span>
+                    <span>Holders controlling 50%</span>
                     <strong>
-                      {Math.round(
-                        advanced.effectiveHolders,
-                      ).toLocaleString("en-US")}
+                      {holdersControlling50Share === null
+                        ? "—"
+                        : `${holdersControlling50Share.toFixed(
+                            2,
+                          )}%`}
                     </strong>
                   </div>
                 </div>

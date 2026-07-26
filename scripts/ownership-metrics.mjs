@@ -166,6 +166,75 @@ function calculateTopGroup(
   };
 }
 
+function calculateDistributionThresholds(
+  sortedAscending,
+  sortedDescending,
+  totalSupply,
+) {
+  const holderCount = sortedAscending.length;
+
+  if (holderCount === 0 || totalSupply === 0) {
+    return {
+      bottom50Percent: {
+        holderCount: 0,
+        inscriptions: 0,
+        share: 0,
+      },
+      holdersControlling50Percent: {
+        holderCount: 0,
+        holderShare: 0,
+        inscriptions: 0,
+        share: 0,
+      },
+    };
+  }
+
+  const bottom50HolderCount = Math.floor(
+    holderCount * 0.5,
+  );
+
+  const bottom50Inscriptions = sortedAscending
+    .slice(0, bottom50HolderCount)
+    .reduce((sum, value) => sum + value, 0);
+
+  const targetSupply = totalSupply * 0.5;
+
+  let controllingHolderCount = 0;
+  let controllingInscriptions = 0;
+
+  for (const holding of sortedDescending) {
+    controllingHolderCount += 1;
+    controllingInscriptions += holding;
+
+    if (controllingInscriptions >= targetSupply) {
+      break;
+    }
+  }
+
+  return {
+    bottom50Percent: {
+      holderCount: bottom50HolderCount,
+      inscriptions: bottom50Inscriptions,
+      share: round(
+        (bottom50Inscriptions / totalSupply) * 100,
+        2,
+      ),
+    },
+    holdersControlling50Percent: {
+      holderCount: controllingHolderCount,
+      holderShare: round(
+        (controllingHolderCount / holderCount) * 100,
+        2,
+      ),
+      inscriptions: controllingInscriptions,
+      share: round(
+        (controllingInscriptions / totalSupply) * 100,
+        2,
+      ),
+    },
+  };
+}
+
 function calculateSupplyDistribution(
   holdings,
   totalSupply,
@@ -355,6 +424,19 @@ export function calculateAdvancedOwnership(values) {
           share: 0,
         },
       },
+      distributionThresholds: {
+        bottom50Percent: {
+          holderCount: 0,
+          inscriptions: 0,
+          share: 0,
+        },
+        holdersControlling50Percent: {
+          holderCount: 0,
+          holderShare: 0,
+          inscriptions: 0,
+          share: 0,
+        },
+      },
       whaleTiers: [],
       lorenzCurve: [],
     };
@@ -437,6 +519,13 @@ export function calculateAdvancedOwnership(values) {
         10,
       ),
     },
+
+    distributionThresholds:
+      calculateDistributionThresholds(
+        sortedAscending,
+        sortedDescending,
+        totalSupply,
+      ),
 
     whaleTiers: calculateWhaleTiers(
       holdings,

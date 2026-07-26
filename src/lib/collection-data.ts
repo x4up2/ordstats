@@ -74,6 +74,20 @@ export type AdvancedOwnership = {
     top10Percent: HolderGroupMetric;
   };
 
+  distributionThresholds?: {
+    bottom50Percent: {
+      holderCount: number;
+      inscriptions: number;
+      share: number;
+    };
+    holdersControlling50Percent: {
+      holderCount: number;
+      holderShare: number;
+      inscriptions: number;
+      share: number;
+    };
+  };
+
   whaleTiers: WhaleTier[];
   lorenzCurve: LorenzPoint[];
 };
