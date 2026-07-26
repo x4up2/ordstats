@@ -345,10 +345,14 @@ function Sparkline({
     (observation) => observation.value,
   );
 
+  const chartValues = values.map((value) =>
+    Number(value.toFixed(metric.decimals)),
+  );
+
   const firstDate = Math.min(...dates);
   const lastDate = Math.max(...dates);
-  const minimumValue = Math.min(...values);
-  const maximumValue = Math.max(...values);
+  const minimumValue = Math.min(...chartValues);
+  const maximumValue = Math.max(...chartValues);
 
   const dateRange = Math.max(
     1,
@@ -373,7 +377,7 @@ function Sparkline({
         maximumValue === minimumValue
           ? height / 2
           : verticalPadding +
-            ((maximumValue - observation.value) /
+            ((maximumValue - chartValues[index]) /
               valueRange) *
               (height - verticalPadding * 2);
 
