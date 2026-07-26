@@ -215,7 +215,7 @@ function formatDelta(
     Math.abs(delta) < threshold ? 0 : delta;
 
   if (normalizedDelta === 0) {
-    return "—";
+    return "-";
   }
 
   const formatted =
