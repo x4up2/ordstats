@@ -2457,16 +2457,13 @@ body {
   white-space: nowrap;
 }
 
-.history-positive strong {
+.history-positive strong,
+.history-negative strong {
   color: #9fc0df;
 }
 
-.history-negative strong {
-  color: #768da5;
-}
-
 .history-neutral strong {
-  color: var(--text);
+  color: #5f7691;
 }
 
 .history-footer {
@@ -2528,16 +2525,13 @@ body {
   white-space: nowrap;
 }
 
-.history-chart-positive {
+.history-chart-positive,
+.history-chart-negative {
   color: #9fc0df;
 }
 
-.history-chart-negative {
-  color: #768da5;
-}
-
 .history-chart-neutral {
-  color: var(--muted);
+  color: #5f7691;
 }
 
 .history-sparkline-wrap {
