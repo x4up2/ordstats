@@ -566,9 +566,9 @@ export default function OwnershipHistory({
         </div>
 
         <p className="section-description">
-          Compare current ownership with earlier daily
-          snapshots and inspect the evolution of key
-          indicators.
+          Large figures show metric variations over the
+          selected period. Smaller values show baseline
+          → current.
         </p>
       </div>
 

@@ -2451,7 +2451,7 @@ body {
 }
 
 .history-card small {
-  color: var(--faint);
+  color: var(--muted);
   font-size: 12px;
   line-height: 1.4;
   white-space: nowrap;
