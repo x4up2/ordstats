@@ -493,17 +493,17 @@ function Sparkline({
 
             <line
               className={`history-sparkline-point-outline${modifier}`}
-              x1={coordinate.x}
+              x1={coordinate.x - 0.01}
               y1={coordinate.y}
-              x2={coordinate.x}
+              x2={coordinate.x + 0.01}
               y2={coordinate.y}
             />
 
             <line
               className={`history-sparkline-point${modifier}`}
-              x1={coordinate.x}
+              x1={coordinate.x - 0.01}
               y1={coordinate.y}
-              x2={coordinate.x}
+              x2={coordinate.x + 0.01}
               y2={coordinate.y}
             />
           </g>

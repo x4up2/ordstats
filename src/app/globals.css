@@ -2599,6 +2599,24 @@ body {
   stroke-width: 9px;
 }
 
+@media (max-width: 620px) {
+  .history-sparkline-point-outline {
+    stroke-width: 6px;
+  }
+
+  .history-sparkline-point {
+    stroke-width: 4px;
+  }
+
+  .history-sparkline-point-outline.history-sparkline-point-latest {
+    stroke-width: 8px;
+  }
+
+  .history-sparkline-point.history-sparkline-point-latest {
+    stroke-width: 6px;
+  }
+}
+
 
 
 .history-sparkline-tooltip {
