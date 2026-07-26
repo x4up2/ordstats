@@ -917,20 +917,9 @@ export default async function CollectionPage({
                     />
 
                     {advanced.lorenzCurve.map((point) => {
-                      const inset = 0.8;
-
-                      const pointX = Math.min(
-                        100 - inset,
-                        Math.max(inset, point.holdersShare),
-                      );
-
-                      const pointY = Math.min(
-                        100 - inset,
-                        Math.max(
-                          inset,
-                          100 - point.supplyShare,
-                        ),
-                      );
+                      const pointX = point.holdersShare;
+                      const pointY =
+                        100 - point.supplyShare;
 
                       return (
                         <g

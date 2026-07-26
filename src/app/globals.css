@@ -3934,3 +3934,7 @@ html {
   letter-spacing: normal;
   text-transform: none;
 }
+
+.lorenz-chart {
+  overflow: visible;
+}
