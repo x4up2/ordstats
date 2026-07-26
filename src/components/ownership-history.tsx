@@ -426,11 +426,20 @@ function Sparkline({
         points={linePoints}
       />
 
-      <circle
+      <line
+        className="history-sparkline-end-outline"
+        x1={lastCoordinate.x}
+        y1={lastCoordinate.y}
+        x2={lastCoordinate.x}
+        y2={lastCoordinate.y}
+      />
+
+      <line
         className="history-sparkline-end"
-        cx={lastCoordinate.x}
-        cy={lastCoordinate.y}
-        r="1.7"
+        x1={lastCoordinate.x}
+        y1={lastCoordinate.y}
+        x2={lastCoordinate.x}
+        y2={lastCoordinate.y}
       />
     </svg>
   );
