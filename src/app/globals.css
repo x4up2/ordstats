@@ -3710,3 +3710,10 @@ a[href^="http://ord.net"]:hover {
 html {
   scrollbar-gutter: stable;
 }
+
+/* ORDSTATS COLLECTION TEXT CONTRAST FLOOR */
+
+.dashboard-frame {
+  --faint: var(--muted);
+}
+
