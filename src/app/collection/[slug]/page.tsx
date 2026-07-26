@@ -1,3 +1,4 @@
+import SiteFooter from "@/components/site-footer";
 import Image from "next/image";
 import Link from "next/link";
 import { MetricCard } from "@/components/metric-card";
@@ -98,6 +99,8 @@ export default async function CollectionPage({
             </Link>
           </div>
         </main>
+
+        <SiteFooter />
       </div>
     );
   }
@@ -1085,10 +1088,7 @@ export default async function CollectionPage({
         </p>
       </main>
 
-      <footer className="site-footer shell">
-        <p>ORDstats</p>
-        <p>Ownership · Distribution · On-chain data</p>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

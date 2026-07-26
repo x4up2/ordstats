@@ -1,3 +1,4 @@
+import SiteFooter from "@/components/site-footer";
 import Image from "next/image";
 import Link from "next/link";
 import CollectionDirectory from "@/components/collection-directory";
@@ -147,13 +148,7 @@ export default async function Home() {
         </section>
       </main>
 
-      <footer className="site-footer shell">
-        <p>ORDstats</p>
-
-        <p>
-          Ownership · Distribution · On-chain data
-        </p>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
