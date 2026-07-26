@@ -915,6 +915,52 @@ export default async function CollectionPage({
                       className="lorenz-curve"
                       points={lorenzPoints}
                     />
+
+                    {advanced.lorenzCurve
+                      .filter(
+                        (point) =>
+                          point.holdersShare > 0 &&
+                          point.holdersShare < 100,
+                      )
+                      .map((point) => {
+                        const pointY =
+                          100 - point.supplyShare;
+
+                        return (
+                          <g
+                            key={point.holdersShare}
+                            aria-hidden="true"
+                          >
+                            <line
+                              className="lorenz-chart-point-outline"
+                              x1={
+                                point.holdersShare -
+                                0.01
+                              }
+                              y1={pointY}
+                              x2={
+                                point.holdersShare +
+                                0.01
+                              }
+                              y2={pointY}
+                            />
+
+                            <line
+                              className="lorenz-chart-point"
+                              x1={
+                                point.holdersShare -
+                                0.01
+                              }
+                              y1={pointY}
+                              x2={
+                                point.holdersShare +
+                                0.01
+                              }
+                              y2={pointY}
+                            />
+                          </g>
+                        );
+                      })}
                   </svg>
 
                   <span className="lorenz-axis lorenz-axis-y">

@@ -3895,3 +3895,30 @@ html {
     justify-content: space-between;
   }
 }
+
+.lorenz-chart-point-outline,
+.lorenz-chart-point {
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+
+.lorenz-chart-point-outline {
+  stroke: rgba(7, 15, 24, 0.95);
+  stroke-width: 5px;
+}
+
+.lorenz-chart-point {
+  stroke: #9fc0df;
+  stroke-width: 3px;
+}
+
+@media (max-width: 620px) {
+  .lorenz-chart-point-outline {
+    stroke-width: 4px;
+  }
+
+  .lorenz-chart-point {
+    stroke-width: 2px;
+  }
+}
