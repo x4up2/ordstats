@@ -916,51 +916,45 @@ export default async function CollectionPage({
                       points={lorenzPoints}
                     />
 
-                    {advanced.lorenzCurve
-                      .filter(
-                        (point) =>
-                          point.holdersShare > 0 &&
-                          point.holdersShare < 100,
-                      )
-                      .map((point) => {
-                        const pointY =
-                          100 - point.supplyShare;
+                    {advanced.lorenzCurve.map((point) => {
+                      const inset = 0.8;
 
-                        return (
-                          <g
-                            key={point.holdersShare}
-                            aria-hidden="true"
-                          >
-                            <line
-                              className="lorenz-chart-point-outline"
-                              x1={
-                                point.holdersShare -
-                                0.01
-                              }
-                              y1={pointY}
-                              x2={
-                                point.holdersShare +
-                                0.01
-                              }
-                              y2={pointY}
-                            />
+                      const pointX = Math.min(
+                        100 - inset,
+                        Math.max(inset, point.holdersShare),
+                      );
 
-                            <line
-                              className="lorenz-chart-point"
-                              x1={
-                                point.holdersShare -
-                                0.01
-                              }
-                              y1={pointY}
-                              x2={
-                                point.holdersShare +
-                                0.01
-                              }
-                              y2={pointY}
-                            />
-                          </g>
-                        );
-                      })}
+                      const pointY = Math.min(
+                        100 - inset,
+                        Math.max(
+                          inset,
+                          100 - point.supplyShare,
+                        ),
+                      );
+
+                      return (
+                        <g
+                          key={point.holdersShare}
+                          aria-hidden="true"
+                        >
+                          <line
+                            className="lorenz-chart-point-outline"
+                            x1={pointX - 0.01}
+                            y1={pointY}
+                            x2={pointX + 0.01}
+                            y2={pointY}
+                          />
+
+                          <line
+                            className="lorenz-chart-point"
+                            x1={pointX - 0.01}
+                            y1={pointY}
+                            x2={pointX + 0.01}
+                            y2={pointY}
+                          />
+                        </g>
+                      );
+                    })}
                   </svg>
 
                   <span className="lorenz-axis lorenz-axis-y">
