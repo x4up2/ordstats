@@ -2566,10 +2566,20 @@ body {
   vector-effect: non-scaling-stroke;
 }
 
+.history-sparkline-point-hit {
+  stroke: rgba(255, 255, 255, 0.001);
+  stroke-width: 20px;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  pointer-events: stroke;
+  cursor: crosshair;
+}
+
 .history-sparkline-point-outline,
 .history-sparkline-point {
   stroke-linecap: round;
   vector-effect: non-scaling-stroke;
+  pointer-events: none;
 }
 
 .history-sparkline-point-outline {

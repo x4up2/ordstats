@@ -431,6 +431,8 @@ function Sparkline({
       />
 
       {coordinates.map((coordinate, index) => {
+        const observation = observations[index];
+
         const isLatest =
           index === coordinates.length - 1;
 
@@ -438,12 +440,35 @@ function Sparkline({
           ? " history-sparkline-point-latest"
           : "";
 
+        const blockLabel =
+          observation.point.blockHeight === null
+            ? "Block unavailable"
+            : `Block ${Math.round(
+                observation.point.blockHeight,
+              ).toLocaleString("en-US")}`;
+
+        const tooltipLabel =
+          `${formatMetricValue(
+            observation.value,
+            metric,
+          )} · ${blockLabel}`;
+
         return (
           <g
             key={`${coordinate.x.toFixed(
               2,
             )}-${coordinate.y.toFixed(2)}-${index}`}
           >
+            <title>{tooltipLabel}</title>
+
+            <line
+              className="history-sparkline-point-hit"
+              x1={coordinate.x}
+              y1={coordinate.y}
+              x2={coordinate.x}
+              y2={coordinate.y}
+            />
+
             <line
               className={`history-sparkline-point-outline${modifier}`}
               x1={coordinate.x}
