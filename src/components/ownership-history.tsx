@@ -305,6 +305,9 @@ function Sparkline({
   points,
   metric,
 }: SparklineProps) {
+  const [hoveredPointIndex, setHoveredPointIndex] =
+    useState<number | null>(null);
+
   const observations = points
     .map((point) => ({
       point,
@@ -404,9 +407,20 @@ function Sparkline({
     ).toFixed(2)}`,
   ].join(" ");
 
+  const hoveredObservation =
+    hoveredPointIndex === null
+      ? null
+      : observations[hoveredPointIndex] ?? null;
+
+  const hoveredCoordinate =
+    hoveredPointIndex === null
+      ? null
+      : coordinates[hoveredPointIndex] ?? null;
+
   return (
-    <svg
-      className="history-sparkline"
+    <div className="history-sparkline-wrap">
+      <svg
+        className="history-sparkline"
       viewBox={`0 0 ${width} ${height}`}
       preserveAspectRatio="none"
       role="img"
@@ -431,8 +445,6 @@ function Sparkline({
       />
 
       {coordinates.map((coordinate, index) => {
-        const observation = observations[index];
-
         const isLatest =
           index === coordinates.length - 1;
 
@@ -440,33 +452,24 @@ function Sparkline({
           ? " history-sparkline-point-latest"
           : "";
 
-        const blockLabel =
-          observation.point.blockHeight === null
-            ? "Block unavailable"
-            : `Block ${Math.round(
-                observation.point.blockHeight,
-              ).toLocaleString("en-US")}`;
-
-        const tooltipLabel =
-          `${formatMetricValue(
-            observation.value,
-            metric,
-          )} · ${blockLabel}`;
-
         return (
           <g
             key={`${coordinate.x.toFixed(
               2,
             )}-${coordinate.y.toFixed(2)}-${index}`}
           >
-            <title>{tooltipLabel}</title>
-
             <line
               className="history-sparkline-point-hit"
               x1={coordinate.x}
               y1={coordinate.y}
               x2={coordinate.x}
               y2={coordinate.y}
+              onMouseEnter={() => {
+                setHoveredPointIndex(index);
+              }}
+              onMouseLeave={() => {
+                setHoveredPointIndex(null);
+              }}
             />
 
             <line
@@ -487,7 +490,43 @@ function Sparkline({
           </g>
         );
       })}
-    </svg>
+      </svg>
+
+      {hoveredObservation && hoveredCoordinate ? (
+        <div
+          className={`history-sparkline-tooltip${
+            hoveredCoordinate.x < 14
+              ? " history-sparkline-tooltip-left"
+              : hoveredCoordinate.x > 86
+                ? " history-sparkline-tooltip-right"
+                : ""
+          }`}
+          style={{
+            left: `${
+              (hoveredCoordinate.x / width) * 100
+            }%`,
+            top: `${
+              (hoveredCoordinate.y / height) * 100
+            }%`,
+          }}
+        >
+          <strong>
+            {formatMetricValue(
+              hoveredObservation.value,
+              metric,
+            )}
+          </strong>
+
+          <span>
+            {hoveredObservation.point.blockHeight === null
+              ? "Block unavailable"
+              : `Block ${Math.round(
+                  hoveredObservation.point.blockHeight,
+                ).toLocaleString("en-US")}`}
+          </span>
+        </div>
+      ) : null}
+    </div>
   );
 }
 
