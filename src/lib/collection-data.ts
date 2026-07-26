@@ -264,7 +264,7 @@ export async function getCollectionSnapshots(
   limit = 2,
 ): Promise<HistoricalCollectionSnapshot[]> {
   const normalizedSlug = slug.trim().toLowerCase();
-  const safeLimit = Math.max(1, Math.min(limit, 45));
+  const safeLimit = Math.max(1, Math.min(limit, 370));
 
   return getCachedCollectionSnapshots(
     normalizedSlug,
