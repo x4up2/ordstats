@@ -43,15 +43,13 @@ export default function BitcoinTip() {
 
   return (
     <div className="bitcoin-tip">
-      <div className="bitcoin-tip-copy">
+      <p className="bitcoin-tip-copy">
         <strong>Support ORDstats</strong>
-
         <span>
-          ORDstats is free and independently operated.
-          Tips help support its infrastructure and
-          continued development.
+          {" · "}Tips help fund infrastructure and continued
+          development.
         </span>
-      </div>
+      </p>
 
       <div className="bitcoin-tip-action">
         <span

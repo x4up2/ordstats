@@ -3720,7 +3720,7 @@ html {
 /* ORDSTATS BITCOIN TIP */
 
 .site-footer {
-  min-height: 176px;
+  min-height: 150px;
   display: grid;
   grid-template-columns:
     auto minmax(360px, 620px) auto;
@@ -3742,30 +3742,29 @@ html {
 }
 
 .bitcoin-tip-copy {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.bitcoin-tip-copy strong {
-  color: var(--text-soft);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.035em;
-}
-
-.bitcoin-tip-copy span {
+  margin: 0;
   color: var(--muted);
   font-family: Arial, Helvetica, sans-serif;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
-  line-height: 1.5;
+  line-height: 1.45;
   letter-spacing: 0;
   text-transform: none;
 }
 
+.bitcoin-tip-copy strong {
+  color: var(--text-soft);
+  font-size: inherit;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.bitcoin-tip-copy span {
+  color: var(--muted);
+}
+
 .bitcoin-tip-action {
-  margin-top: 13px;
+  margin-top: 9px;
   display: flex;
   align-items: center;
   justify-content: center;
