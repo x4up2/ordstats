@@ -982,6 +982,10 @@ export default async function CollectionPage({
                             2,
                           )}%`}
                     </strong>
+                    <small>
+                      Supply held by the least-funded half
+                      of addresses.
+                    </small>
                   </div>
 
                   <div>
@@ -993,6 +997,10 @@ export default async function CollectionPage({
                             2,
                           )}%`}
                     </strong>
+                    <small>
+                      Smallest share of the largest addresses
+                      needed to hold at least 50% of supply.
+                    </small>
                   </div>
                 </div>
               </article>

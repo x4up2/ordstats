@@ -3922,3 +3922,15 @@ html {
     stroke-width: 2px;
   }
 }
+
+.lorenz-summary small {
+  display: block;
+  max-width: 34ch;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.45;
+  letter-spacing: normal;
+  text-transform: none;
+}
