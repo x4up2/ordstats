@@ -43,31 +43,23 @@ export default function BitcoinTip() {
 
   return (
     <div className="bitcoin-tip">
-      <p className="bitcoin-tip-copy">
-        <strong>Support ORDstats</strong>
-        <span>
-          {" · "}Tips help fund infrastructure and continued
-          development.
-        </span>
-      </p>
+      <strong>Support ORDstats</strong>
 
-      <div className="bitcoin-tip-action">
-        <span
-          className="bitcoin-tip-address"
-          title={BITCOIN_TIP_ADDRESS}
-        >
-          {shortAddress}
-        </span>
+      <span
+        className="bitcoin-tip-address"
+        title={BITCOIN_TIP_ADDRESS}
+      >
+        {shortAddress}
+      </span>
 
-        <button
-          className="bitcoin-tip-button"
-          type="button"
-          onClick={copyAddress}
-          aria-label="Copy the ORDstats Bitcoin tip address"
-        >
-          {buttonLabel}
-        </button>
-      </div>
+      <button
+        className="bitcoin-tip-button"
+        type="button"
+        onClick={copyAddress}
+        aria-label="Copy the ORDstats Bitcoin tip address"
+      >
+        {buttonLabel}
+      </button>
     </div>
   );
 }
