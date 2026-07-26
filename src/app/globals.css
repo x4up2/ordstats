@@ -3810,7 +3810,7 @@ html {
 }
 
 .bitcoin-tip strong {
-  color: var(--text-soft);
+  color: var(--muted);
   font-size: inherit;
   font-weight: 700;
 }
@@ -3823,7 +3823,7 @@ html {
   padding: 6px 9px;
   border: 1px solid var(--border-strong);
   background: rgba(20, 52, 89, 0.22);
-  color: var(--blue-soft);
+  color: var(--muted);
   font-family: var(--font-mono);
   font-size: 9px;
   font-weight: 700;
@@ -3833,8 +3833,8 @@ html {
 }
 
 .bitcoin-tip-button:hover {
-  border-color: var(--blue-soft);
-  color: var(--text);
+  border-color: var(--border-strong);
+  color: var(--muted);
 }
 
 @media (max-width: 620px) {
