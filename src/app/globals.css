@@ -2566,20 +2566,29 @@ body {
   vector-effect: non-scaling-stroke;
 }
 
-.history-sparkline-end-outline,
-.history-sparkline-end {
+.history-sparkline-point-outline,
+.history-sparkline-point {
   stroke-linecap: round;
   vector-effect: non-scaling-stroke;
 }
 
-.history-sparkline-end-outline {
+.history-sparkline-point-outline {
   stroke: #0a1421;
   stroke-width: 8px;
 }
 
-.history-sparkline-end {
-  stroke: #a9c9e6;
+.history-sparkline-point {
+  stroke: #91bce0;
   stroke-width: 6px;
+}
+
+.history-sparkline-point-outline.history-sparkline-point-latest {
+  stroke-width: 11px;
+}
+
+.history-sparkline-point.history-sparkline-point-latest {
+  stroke: #b4d3ed;
+  stroke-width: 9px;
 }
 
 .history-sparkline-empty {

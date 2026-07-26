@@ -426,21 +426,38 @@ function Sparkline({
         points={linePoints}
       />
 
-      <line
-        className="history-sparkline-end-outline"
-        x1={lastCoordinate.x}
-        y1={lastCoordinate.y}
-        x2={lastCoordinate.x}
-        y2={lastCoordinate.y}
-      />
+      {coordinates.map((coordinate, index) => {
+        const isLatest =
+          index === coordinates.length - 1;
 
-      <line
-        className="history-sparkline-end"
-        x1={lastCoordinate.x}
-        y1={lastCoordinate.y}
-        x2={lastCoordinate.x}
-        y2={lastCoordinate.y}
-      />
+        const modifier = isLatest
+          ? " history-sparkline-point-latest"
+          : "";
+
+        return (
+          <g
+            key={`${coordinate.x.toFixed(
+              2,
+            )}-${coordinate.y.toFixed(2)}-${index}`}
+          >
+            <line
+              className={`history-sparkline-point-outline${modifier}`}
+              x1={coordinate.x}
+              y1={coordinate.y}
+              x2={coordinate.x}
+              y2={coordinate.y}
+            />
+
+            <line
+              className={`history-sparkline-point${modifier}`}
+              x1={coordinate.x}
+              y1={coordinate.y}
+              x2={coordinate.x}
+              y2={coordinate.y}
+            />
+          </g>
+        );
+      })}
     </svg>
   );
 }
