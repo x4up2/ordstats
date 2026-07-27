@@ -1058,31 +1058,15 @@ export default function OwnershipHistory({
 
               <div className="history-chart-grid">
                 {chartMetrics.map((metric) => {
-                  const previousValue =
-                    getMetricValue(
-                      chartBaselinePoint,
-                      metric.key,
-                    );
-
                   const currentValue =
                     getMetricValue(
                       latestPoint,
                       metric.key,
                     );
 
-                  if (
-                    previousValue === null ||
-                    currentValue === null
-                  ) {
+                  if (currentValue === null) {
                     return null;
                   }
-
-                  const delta =
-                    calculateDisplayedDelta(
-                      previousValue,
-                      currentValue,
-                      metric,
-                    );
 
                   return (
                     <article
@@ -1101,11 +1085,7 @@ export default function OwnershipHistory({
                           </strong>
                         </div>
 
-                        <small
-                          className={`history-chart-change history-chart-${deltaTone(delta, metric)}`}
-                        >
-                          {formatDelta(delta, metric)}
-                        </small>
+
                       </div>
 
                       <Sparkline
