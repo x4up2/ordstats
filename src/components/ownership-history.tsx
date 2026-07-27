@@ -131,13 +131,13 @@ const historyMetricDefinitions: HistoryMetricDefinition[] = [
 
 const summaryMetricKeys: HistoryMetricKey[] = [
   "holdingAddresses",
-  "ownershipEvenness",
+  "singleHolders",
+  "averageHolding",
   "effectiveHolders",
   "giniCoefficient",
-  "largestHolderShare",
   "top1SupplyShare",
+  "ownershipEvenness",
   "singleHolderSupplyShare",
-  "averageHolding",
 ];
 
 const chartMetricKeys: HistoryMetricKey[] = [
@@ -706,9 +706,17 @@ export default function OwnershipHistory({
         )
       : [];
 
-  const summaryMetrics =
-    availableMetrics.filter((metric) =>
-      summaryMetricKeys.includes(metric.key),
+  const summaryMetrics = summaryMetricKeys
+    .map((key) =>
+      availableMetrics.find(
+        (metric) => metric.key === key,
+      ),
+    )
+    .filter(
+      (
+        metric,
+      ): metric is HistoryMetricDefinition =>
+        metric !== undefined,
     );
 
   const chartMetrics = chartMetricKeys
