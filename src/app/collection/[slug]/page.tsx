@@ -1,6 +1,7 @@
 import SiteFooter from "@/components/site-footer";
 import Image from "next/image";
 import Link from "next/link";
+import LocalSnapshotTime from "@/components/local-snapshot-time";
 import { MetricCard } from "@/components/metric-card";
 import OwnershipHistory, {
   type OwnershipHistoryPoint,
@@ -116,20 +117,6 @@ export default async function CollectionPage({
   const imageUrl =
     collection.image_url ??
     `https://render.ord.net/v5/snapshots/${collection.source_id}/512.webp`;
-
-  const snapshotDate = collection.latest_snapshot_at
-    ? new Intl.DateTimeFormat("en-GB", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        timeZone: "UTC",
-        timeZoneName: "short",
-        second: "2-digit",
-        hour12: false,
-      }).format(new Date(collection.latest_snapshot_at))
-    : "Date unavailable";
 
   const ownershipEvenness =
     advanced && ownership.holdingAddresses > 0
@@ -592,7 +579,10 @@ export default async function CollectionPage({
             <div className="collection-copy">
               <div className="demo-label">
                 <span className="status-dot" />
-                Snapshot captured · {snapshotDate}
+                Snapshot captured ·{" "}
+                <LocalSnapshotTime
+                  value={collection.latest_snapshot_at}
+                />
               </div>
 
               <h1>{collection.name}</h1>
