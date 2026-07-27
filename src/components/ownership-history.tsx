@@ -135,6 +135,10 @@ function findBaseline(
   points: OwnershipHistoryPoint[],
   days: number,
 ) {
+  if (points.length < 2) {
+    return null;
+  }
+
   const latest = points.at(-1);
 
   if (!latest) {
@@ -157,15 +161,13 @@ function findBaseline(
     .toISOString()
     .slice(0, 10);
 
-  let baseline: OwnershipHistoryPoint | null = null;
-
-  for (const point of points) {
-    if (point.snapshotDate <= targetKey) {
-      baseline = point;
-    }
-  }
-
-  return baseline;
+  return (
+    points.find(
+      (point) =>
+        point.snapshotDate >= targetKey &&
+        point.snapshotDate < latest.snapshotDate,
+    ) ?? null
+  );
 }
 
 function getMetricValue(
@@ -842,8 +844,10 @@ export default function OwnershipHistory({
           ) : null}
 
           <p className="history-data-note">
-            Lines connect recorded daily observations only.
-            Missing dates are not interpolated or estimated.
+            Each tab shows recorded observations within its
+            maximum time window. Lines connect observations
+            only; missing dates are not interpolated or
+            estimated.
           </p>
         </>
       ) : (
@@ -858,9 +862,9 @@ export default function OwnershipHistory({
             </h3>
 
             <p>
-              ORDstats will activate each comparison period
-              when a snapshot exists on or before the
-              corresponding target date. No historical value
+              ORDstats activates each comparison period as
+              soon as at least two observations fall within
+              the selected time window. No historical value
               is estimated.
             </p>
           </div>
