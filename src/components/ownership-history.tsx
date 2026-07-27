@@ -332,29 +332,6 @@ function formatLongDate(snapshotDate: string) {
   }).format(date);
 }
 
-function differenceInDays(
-  startDate: string,
-  endDate: string,
-) {
-  const start = parseSnapshotDate(startDate);
-  const end = parseSnapshotDate(endDate);
-
-  if (
-    Number.isNaN(start.getTime()) ||
-    Number.isNaN(end.getTime())
-  ) {
-    return 0;
-  }
-
-  return Math.max(
-    0,
-    Math.round(
-      (end.getTime() - start.getTime()) /
-        DAY_IN_MS,
-    ),
-  );
-}
-
 type SparklineProps = {
   points: OwnershipHistoryPoint[];
   metric: HistoryMetricDefinition;
@@ -694,10 +671,7 @@ export default function OwnershipHistory({
 
   const observedDays =
     baselinePoint && latestPoint
-      ? differenceInDays(
-          baselinePoint.snapshotDate,
-          latestPoint.snapshotDate,
-        )
+      ? activePoints.length
       : 0;
 
   return (
