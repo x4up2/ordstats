@@ -2505,7 +2505,7 @@ body {
 }
 
 .history-chart-heading span {
-  color: var(--text-soft);
+  color: #fff;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.055em;
