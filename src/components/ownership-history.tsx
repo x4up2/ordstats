@@ -323,6 +323,36 @@ function formatMetricValue(
   });
 }
 
+function formatAxisValue(
+  value: number,
+  metric: HistoryMetricDefinition,
+) {
+  if (metric.format === "integer") {
+    const decimals = Number.isInteger(value) ? 0 : 1;
+
+    return value.toLocaleString("en-US", {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    });
+  }
+
+  if (metric.format === "gini") {
+    return value.toFixed(3);
+  }
+
+  if (metric.format === "percent") {
+    return `${value.toLocaleString("en-US", {
+      minimumFractionDigits: metric.decimals,
+      maximumFractionDigits: metric.decimals,
+    })}%`;
+  }
+
+  return value.toLocaleString("en-US", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: metric.decimals,
+  });
+}
+
 function calculateDisplayedDelta(
   previousValue: number,
   currentValue: number,
@@ -498,6 +528,22 @@ function Sparkline({
   const minimumValue = Math.min(...chartValues);
   const maximumValue = Math.max(...chartValues);
 
+  const middleValue =
+    (maximumValue + minimumValue) / 2;
+
+  const yAxisLabels =
+    maximumValue === minimumValue
+      ? [
+          "",
+          formatAxisValue(maximumValue, metric),
+          "",
+        ]
+      : [
+          formatAxisValue(maximumValue, metric),
+          formatAxisValue(middleValue, metric),
+          formatAxisValue(minimumValue, metric),
+        ];
+
   const dateRange = Math.max(
     1,
     lastDate - firstDate,
@@ -566,21 +612,40 @@ function Sparkline({
       : coordinates[hoveredPointIndex] ?? null;
 
   return (
-    <div className="history-sparkline-wrap">
-      <svg
+    <div className="history-sparkline-layout">
+      <div
+        className="history-sparkline-y-axis"
+        aria-hidden="true"
+      >
+        {yAxisLabels.map((label, index) => (
+          <span key={`${label}-${index}`}>
+            {label}
+          </span>
+        ))}
+      </div>
+
+      <div className="history-sparkline-wrap">
+        <svg
         className="history-sparkline"
       viewBox={`0 0 ${width} ${height}`}
       preserveAspectRatio="none"
       role="img"
       aria-label={`${metric.label} evolution across ${observations.length} daily snapshots`}
     >
-      <line
-        className="history-sparkline-guide"
-        x1="0"
-        y1={height / 2}
-        x2={width}
-        y2={height / 2}
-      />
+      {[
+        verticalPadding,
+        height / 2,
+        height - verticalPadding,
+      ].map((guideY) => (
+        <line
+          className="history-sparkline-guide"
+          key={guideY}
+          x1="0"
+          y1={guideY}
+          x2={width}
+          y2={guideY}
+        />
+      ))}
 
       <polygon
         className="history-sparkline-area"
@@ -674,6 +739,7 @@ function Sparkline({
           </span>
         </div>
       ) : null}
+      </div>
     </div>
   );
 }
@@ -1058,16 +1124,6 @@ export default function OwnershipHistory({
 
               <div className="history-chart-grid">
                 {chartMetrics.map((metric) => {
-                  const currentValue =
-                    getMetricValue(
-                      latestPoint,
-                      metric.key,
-                    );
-
-                  if (currentValue === null) {
-                    return null;
-                  }
-
                   return (
                     <article
                       className="history-chart-card"
@@ -1076,16 +1132,7 @@ export default function OwnershipHistory({
                       <div className="history-chart-heading">
                         <div>
                           <span>{metric.label}</span>
-
-                          <strong>
-                            {formatMetricValue(
-                              currentValue,
-                              metric,
-                            )}
-                          </strong>
                         </div>
-
-
                       </div>
 
                       <Sparkline

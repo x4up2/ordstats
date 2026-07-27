@@ -3971,3 +3971,55 @@ html {
   }
 }
 
+/* ORDstats History chart axes */
+.history-chart-card {
+  --history-y-axis-width: 68px;
+  --history-y-axis-gap: 12px;
+}
+
+.history-sparkline-layout {
+  margin-top: 29px;
+  display: grid;
+  grid-template-columns:
+    var(--history-y-axis-width)
+    minmax(0, 1fr);
+  column-gap: var(--history-y-axis-gap);
+  align-items: stretch;
+}
+
+.history-sparkline-layout .history-sparkline-wrap {
+  margin-top: 0;
+}
+
+.history-sparkline-y-axis {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 12px 0;
+  color: var(--faint);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.history-chart-axis {
+  margin-left: calc(
+    var(--history-y-axis-width) +
+    var(--history-y-axis-gap)
+  );
+}
+
+@media (max-width: 640px) {
+  .history-chart-card {
+    --history-y-axis-width: 58px;
+    --history-y-axis-gap: 8px;
+  }
+
+  .history-sparkline-y-axis {
+    font-size: 10px;
+  }
+}
+
