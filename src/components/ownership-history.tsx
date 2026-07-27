@@ -129,7 +129,7 @@ const historyMetricDefinitions: HistoryMetricDefinition[] = [
   },
 ];
 
-const summaryMetricKeys: HistoryMetricKey[] = [
+const historyDisplayMetricKeys: HistoryMetricKey[] = [
   "holdingAddresses",
   "singleHolders",
   "averageHolding",
@@ -138,15 +138,6 @@ const summaryMetricKeys: HistoryMetricKey[] = [
   "top1SupplyShare",
   "ownershipEvenness",
   "singleHolderSupplyShare",
-];
-
-const chartMetricKeys: HistoryMetricKey[] = [
-  "holdingAddresses",
-  "singleHolders",
-  "averageHolding",
-  "effectiveHolders",
-  "giniCoefficient",
-  "top1SupplyShare",
 ];
 
 function parseSnapshotDate(snapshotDate: string) {
@@ -706,31 +697,25 @@ export default function OwnershipHistory({
         )
       : [];
 
-  const summaryMetrics = summaryMetricKeys
-    .map((key) =>
-      availableMetrics.find(
-        (metric) => metric.key === key,
-      ),
-    )
-    .filter(
-      (
-        metric,
-      ): metric is HistoryMetricDefinition =>
-        metric !== undefined,
-    );
+  const summaryMetrics =
+    historyDisplayMetricKeys
+      .map((key) =>
+        availableMetrics.find(
+          (metric) => metric.key === key,
+        ),
+      )
+      .filter(
+        (
+          metric,
+        ): metric is HistoryMetricDefinition =>
+          metric !== undefined,
+      );
 
-  const chartMetrics = chartMetricKeys
-    .map((key) =>
-      availableMetrics.find(
-        (metric) => metric.key === key,
-      ),
-    )
-    .filter(
-      (
-        metric,
-      ): metric is HistoryMetricDefinition =>
-        metric !== undefined,
-    );
+  /*
+   * Le récapitulatif et les graphiques utilisent
+   * les mêmes huit métriques, dans le même ordre.
+   */
+  const chartMetrics = summaryMetrics;
 
   const observedDays =
     baselinePoint && latestPoint
