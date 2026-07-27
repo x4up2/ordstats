@@ -4027,7 +4027,7 @@ html {
 .history-chart-card {
   --history-y-axis-width: 44px;
   --history-y-axis-gap: 6px;
-  --history-y-axis-offset: 27px;
+  --history-y-axis-offset: 21px;
 }
 
 .history-sparkline-layout {
