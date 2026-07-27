@@ -485,8 +485,30 @@ export default async function CollectionPage({
     const currentDate = new Date(currentCapturedAt);
 
     if (!Number.isNaN(currentDate.getTime())) {
+      const currentSnapshotDateParts =
+        Object.fromEntries(
+          new Intl.DateTimeFormat("en-CA", {
+            timeZone: "Europe/Paris",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+          })
+            .formatToParts(currentDate)
+            .filter(
+              (part) => part.type !== "literal",
+            )
+            .map(
+              (part) => [
+                part.type,
+                part.value,
+              ],
+            ),
+        );
+
       const currentSnapshotDate =
-        currentDate.toISOString().slice(0, 10);
+        `${currentSnapshotDateParts.year}-` +
+        `${currentSnapshotDateParts.month}-` +
+        `${currentSnapshotDateParts.day}`;
 
       historyPointByDate.set(
         currentSnapshotDate,
