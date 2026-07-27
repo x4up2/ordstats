@@ -819,6 +819,7 @@ export default function OwnershipHistory({
                 {formatLongDate(
                   baselinePoint.snapshotDate,
                 )}
+                {" · Europe/Paris time"}
                 {baselinePoint.blockHeight
                   ? ` · Bitcoin block ${baselinePoint.blockHeight.toLocaleString(
                       "en-US",
