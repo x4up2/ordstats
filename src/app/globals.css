@@ -2547,8 +2547,8 @@ body {
 }
 
 .history-sparkline-guide {
-  stroke: rgba(91, 125, 159, 0.17);
-  stroke-width: 0.5;
+  stroke: rgba(112, 149, 184, 0.3);
+  stroke-width: 0.7;
   stroke-dasharray: 2 3;
   vector-effect: non-scaling-stroke;
 }
@@ -4063,5 +4063,46 @@ html {
 .history-sparkline-layout .history-sparkline-wrap,
 .history-chart-axis {
   margin-right: 4px;
+}
+
+/* ORDstats History visible axes and time ticks */
+.history-sparkline-axis-y {
+  stroke: rgba(155, 195, 229, 0.68);
+  stroke-width: 1.15;
+  vector-effect: non-scaling-stroke;
+}
+
+.history-sparkline-axis-x {
+  stroke: rgba(145, 183, 216, 0.5);
+  stroke-width: 0.9;
+  vector-effect: non-scaling-stroke;
+}
+
+.history-sparkline-axis-tick {
+  stroke: rgba(145, 183, 216, 0.5);
+  stroke-width: 0.9;
+  vector-effect: non-scaling-stroke;
+}
+
+.history-sparkline-y-axis {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.history-chart-axis {
+  padding-inline: 3%;
+  color: var(--muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.history-chart-axis span {
+  white-space: nowrap;
+}
+
+@media (max-width: 560px) {
+  .history-chart-axis {
+    font-size: 10px;
+  }
 }
 

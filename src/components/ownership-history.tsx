@@ -325,18 +325,70 @@ function formatAxisValue(
   });
 }
 
-function formatShortDate(snapshotDate: string) {
+function formatShortDate(
+  snapshotDate: string,
+  includeYear = false,
+) {
   const date = parseSnapshotDate(snapshotDate);
 
   if (Number.isNaN(date.getTime())) {
     return snapshotDate;
   }
 
-  return new Intl.DateTimeFormat("en-GB", {
+  const options: Intl.DateTimeFormatOptions = {
     day: "numeric",
     month: "short",
     timeZone: "UTC",
-  }).format(date);
+  };
+
+  if (includeYear) {
+    options.year = "2-digit";
+  }
+
+  return new Intl.DateTimeFormat(
+    "en-GB",
+    options,
+  ).format(date);
+}
+
+function getTimeAxisTicks(
+  windowStartDate: string,
+  periodDays: number,
+) {
+  const startDate =
+    parseSnapshotDate(windowStartDate);
+
+  if (Number.isNaN(startDate.getTime())) {
+    return [];
+  }
+
+  const spanDays =
+    getPeriodSpanDays(periodDays);
+
+  const ratios = [
+    0,
+    1 / 3,
+    2 / 3,
+    1,
+  ];
+
+  return ratios.map((ratio, index) => {
+    const date = new Date(
+      startDate.getTime() +
+        spanDays * ratio * DAY_IN_MS,
+    );
+
+    const snapshotDate =
+      date.toISOString().slice(0, 10);
+
+    return {
+      key: `${index}-${snapshotDate}`,
+      label: formatShortDate(
+        snapshotDate,
+        periodDays >= 365,
+      ),
+    };
+  });
 }
 
 type SparklineProps = {
@@ -425,6 +477,18 @@ function Sparkline({
           formatAxisValue(middleValue, metric),
           formatAxisValue(minimumValue, metric),
         ];
+
+  const xAxisPositions = [
+    0,
+    1 / 3,
+    2 / 3,
+    1,
+  ].map(
+    (ratio) =>
+      horizontalPadding +
+      ratio *
+        (width - horizontalPadding * 2),
+  );
 
   const dateRange = Math.max(
     1,
@@ -517,15 +581,41 @@ function Sparkline({
       {[
         verticalPadding,
         height / 2,
-        height - verticalPadding,
       ].map((guideY) => (
         <line
           className="history-sparkline-guide"
           key={guideY}
-          x1="0"
+          x1={horizontalPadding}
           y1={guideY}
-          x2={width}
+          x2={width - horizontalPadding}
           y2={guideY}
+        />
+      ))}
+
+      <line
+        className="history-sparkline-axis-y"
+        x1={horizontalPadding}
+        y1={verticalPadding}
+        x2={horizontalPadding}
+        y2={height - verticalPadding}
+      />
+
+      <line
+        className="history-sparkline-axis-x"
+        x1={horizontalPadding}
+        y1={height - verticalPadding}
+        x2={width - horizontalPadding}
+        y2={height - verticalPadding}
+      />
+
+      {xAxisPositions.map((tickX, index) => (
+        <line
+          className="history-sparkline-axis-tick"
+          key={`${tickX}-${index}`}
+          x1={tickX}
+          y1={height - verticalPadding}
+          x2={tickX}
+          y2={height - verticalPadding + 1.8}
         />
       ))}
 
@@ -812,28 +902,17 @@ export default function OwnershipHistory({
                 />
 
                 <div className="history-chart-axis">
-                  <span>
-                    {formatShortDate(
-                      activeChartState
-                        .windowStartDate ??
-                        chartBaselinePoint
-                          .snapshotDate,
-                    )}
-                  </span>
-
-                  <span>
-                    {formatShortDate(
-                      addDaysToSnapshotDate(
-                        activeChartState
-                          .windowStartDate ??
-                          chartBaselinePoint
-                            .snapshotDate,
-                        getPeriodSpanDays(
-                          activeChartState.days,
-                        ),
-                      ),
-                    )}
-                  </span>
+                  {getTimeAxisTicks(
+                    activeChartState
+                      .windowStartDate ??
+                      chartBaselinePoint
+                        .snapshotDate,
+                    activeChartState.days,
+                  ).map((tick) => (
+                    <span key={tick.key}>
+                      {tick.label}
+                    </span>
+                  ))}
                 </div>
               </article>
             ))}
