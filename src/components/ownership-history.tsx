@@ -131,11 +131,69 @@ function parseSnapshotDate(snapshotDate: string) {
   return new Date(`${snapshotDate}T00:00:00Z`);
 }
 
-function findBaseline(
+function getPeriodSpanDays(days: number) {
+  return days === 1 ? 1 : days - 1;
+}
+
+function addDaysToSnapshotDate(
+  snapshotDate: string,
+  days: number,
+) {
+  const date = parseSnapshotDate(snapshotDate);
+
+  if (Number.isNaN(date.getTime())) {
+    return snapshotDate;
+  }
+
+  return new Date(
+    date.getTime() + days * DAY_IN_MS,
+  )
+    .toISOString()
+    .slice(0, 10);
+}
+
+function findWindowStartDate(
   points: OwnershipHistoryPoint[],
   days: number,
 ) {
-  if (points.length < 2) {
+  const earliest = points[0];
+  const latest = points.at(-1);
+
+  if (!earliest || !latest) {
+    return null;
+  }
+
+  const earliestDate = parseSnapshotDate(
+    earliest.snapshotDate,
+  );
+  const latestDate = parseSnapshotDate(
+    latest.snapshotDate,
+  );
+
+  if (
+    Number.isNaN(earliestDate.getTime()) ||
+    Number.isNaN(latestDate.getTime())
+  ) {
+    return null;
+  }
+
+  const targetDate = new Date(
+    latestDate.getTime() -
+      getPeriodSpanDays(days) * DAY_IN_MS,
+  );
+
+  if (earliestDate.getTime() > targetDate.getTime()) {
+    return earliest.snapshotDate;
+  }
+
+  return targetDate.toISOString().slice(0, 10);
+}
+
+function findBaseline(
+  points: OwnershipHistoryPoint[],
+  windowStartDate: string | null,
+) {
+  if (points.length < 2 || !windowStartDate) {
     return null;
   }
 
@@ -145,26 +203,10 @@ function findBaseline(
     return null;
   }
 
-  const latestDate = parseSnapshotDate(
-    latest.snapshotDate,
-  );
-
-  if (Number.isNaN(latestDate.getTime())) {
-    return null;
-  }
-
-  const targetDate = new Date(
-    latestDate.getTime() - days * DAY_IN_MS,
-  );
-
-  const targetKey = targetDate
-    .toISOString()
-    .slice(0, 10);
-
   return (
     points.find(
       (point) =>
-        point.snapshotDate >= targetKey &&
+        point.snapshotDate >= windowStartDate &&
         point.snapshotDate < latest.snapshotDate,
     ) ?? null
   );
@@ -316,11 +358,15 @@ function differenceInDays(
 type SparklineProps = {
   points: OwnershipHistoryPoint[];
   metric: HistoryMetricDefinition;
+  periodDays: number;
+  windowStartDate: string;
 };
 
 function Sparkline({
   points,
   metric,
+  periodDays,
+  windowStartDate,
 }: SparklineProps) {
   const [hoveredPointIndex, setHoveredPointIndex] =
     useState<number | null>(null);
@@ -366,8 +412,17 @@ function Sparkline({
     Number(value.toFixed(metric.decimals)),
   );
 
-  const firstDate = Math.min(...dates);
-  const lastDate = Math.max(...dates);
+  const parsedWindowStart =
+    parseSnapshotDate(windowStartDate).getTime();
+
+  const firstDate = Number.isNaN(parsedWindowStart)
+    ? Math.min(...dates)
+    : parsedWindowStart;
+
+  const lastDate =
+    firstDate +
+    getPeriodSpanDays(periodDays) * DAY_IN_MS;
+
   const minimumValue = Math.min(...chartValues);
   const maximumValue = Math.max(...chartValues);
 
@@ -571,13 +626,22 @@ export default function OwnershipHistory({
 
   const periodStates = useMemo(
     () =>
-      periodOptions.map((period) => ({
-        ...period,
-        baseline: findBaseline(
-          sortedPoints,
-          period.days,
-        ),
-      })),
+      periodOptions.map((period) => {
+        const windowStartDate =
+          findWindowStartDate(
+            sortedPoints,
+            period.days,
+          );
+
+        return {
+          ...period,
+          windowStartDate,
+          baseline: findBaseline(
+            sortedPoints,
+            windowStartDate,
+          ),
+        };
+      }),
     [sortedPoints],
   );
 
@@ -822,18 +886,32 @@ export default function OwnershipHistory({
                     <Sparkline
                       points={activePoints}
                       metric={metric}
+                      periodDays={
+                        activeState?.days ?? 1
+                      }
+                      windowStartDate={
+                        activeState?.windowStartDate ??
+                        baselinePoint.snapshotDate
+                      }
                     />
 
                     <div className="history-chart-axis">
                       <span>
                         {formatShortDate(
-                          baselinePoint.snapshotDate,
+                          activeState?.windowStartDate ??
+                            baselinePoint.snapshotDate,
                         )}
                       </span>
 
                       <span>
                         {formatShortDate(
-                          latestPoint.snapshotDate,
+                          addDaysToSnapshotDate(
+                            activeState?.windowStartDate ??
+                              baselinePoint.snapshotDate,
+                            getPeriodSpanDays(
+                              activeState?.days ?? 1,
+                            ),
+                          ),
                         )}
                       </span>
                     </div>
@@ -844,10 +922,10 @@ export default function OwnershipHistory({
           ) : null}
 
           <p className="history-data-note">
-            Each tab shows recorded observations within its
-            maximum time window. Lines connect observations
-            only; missing dates are not interpolated or
-            estimated.
+            Each tab uses its full calendar window. Empty
+            space represents dates not yet observed; lines
+            connect recorded observations only. Missing dates
+            are not interpolated or estimated.
           </p>
         </>
       ) : (
