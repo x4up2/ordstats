@@ -1,16 +1,68 @@
-import { readFile } from "node:fs/promises";
+import {
+  access,
+  mkdir,
+  readFile,
+  writeFile,
+} from "node:fs/promises";
+import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
+
+const downloadOnly =
+  process.argv.includes("--download-only");
+
+const publishLocal =
+  process.argv.includes("--publish-local");
+
+const force = process.argv.includes("--force");
+
+if (downloadOnly && publishLocal) {
+  throw new Error(
+    "--download-only and --publish-local cannot be combined.",
+  );
+}
+
+const mode = publishLocal
+  ? "publish"
+  : downloadOnly
+    ? "download"
+    : "sync";
+
+const projectRoot = process.cwd();
+
+const outputDirectory = path.join(
+  projectRoot,
+  "public",
+  "collection-images",
+);
+
+await mkdir(outputDirectory, {
+  recursive: true,
+});
 
 const catalog = JSON.parse(
   await readFile(
-    "data/ord-net-top-100-30d.json",
+    path.join(
+      projectRoot,
+      "data",
+      "ord-net-top-100-30d.json",
+    ),
     "utf8",
   ),
 );
 
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseSecret =
+  process.env.SUPABASE_SECRET_KEY;
+
+if (!supabaseUrl || !supabaseSecret) {
+  throw new Error(
+    "SUPABASE_URL or SUPABASE_SECRET_KEY is missing.",
+  );
+}
+
 const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SECRET_KEY,
+  supabaseUrl,
+  supabaseSecret,
   {
     auth: {
       persistSession: false,
@@ -18,6 +70,16 @@ const supabase = createClient(
     },
   },
 );
+
+const supportedExtensions = [
+  "webp",
+  "png",
+  "jpg",
+  "jpeg",
+  "gif",
+  "avif",
+  "svg",
+];
 
 function decodeHtml(value) {
   return value
@@ -27,17 +89,23 @@ function decodeHtml(value) {
     .replaceAll("&#x2F;", "/");
 }
 
-function extractCollectionImage(html, collectionName) {
+function safeFilename(value) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function extractCollectionImage(
+  html,
+  collectionName,
+) {
   const escapedName = collectionName.replace(
     /[.*+?^${}()|[\]\\]/g,
     "\\$&",
   );
 
-  /*
-   * Cherche une balise img dont le texte alternatif correspond
-   * au nom de la collection. C'est l'image réellement affichée
-   * par ord.net dans l'en-tête de la collection.
-   */
   const patterns = [
     new RegExp(
       `<img[^>]+alt=["']${escapedName}["'][^>]+src=["']([^"']+)["']`,
@@ -58,105 +126,314 @@ function extractCollectionImage(html, collectionName) {
   }
 
   /*
-   * Repli : première image render.ord.net présente dans la zone
-   * principale, en excluant les images sociales de type og:image.
+   * Repli : recherche dans le corps de la page, afin
+   * d’éviter les images sociales contenues dans <head>.
    */
-  const bodyHtml = html
-    .replace(
-      /<head[\s\S]*?<\/head>/i,
-      "",
-    );
+  const bodyHtml = html.replace(
+    /<head[\s\S]*?<\/head>/i,
+    "",
+  );
 
-  const renderMatches = [
-    ...bodyHtml.matchAll(
-      /https:\/\/render\.ord\.net\/v\d+\/snapshots\/[^"'<> ]+\/512\.webp/gi,
-    ),
-  ];
+  const renderMatch = bodyHtml.match(
+    /https:\/\/render\.ord\.net\/v\d+\/snapshots\/[^"'<> ]+\/512\.webp/i,
+  );
 
-  return renderMatches[0]?.[0] ?? null;
+  return renderMatch?.[0] ?? null;
 }
 
-const updated = [];
+function extensionFromContentType(contentType) {
+  const mapping = {
+    "image/webp": "webp",
+    "image/png": "png",
+    "image/jpeg": "jpg",
+    "image/gif": "gif",
+    "image/avif": "avif",
+    "image/svg+xml": "svg",
+  };
+
+  return mapping[contentType] ?? null;
+}
+
+function extensionFromUrl(imageUrl) {
+  try {
+    const pathname = new URL(imageUrl).pathname;
+    const match = pathname.match(
+      /\.([a-z0-9]+)$/i,
+    );
+
+    const extension =
+      match?.[1]?.toLowerCase() ?? null;
+
+    return supportedExtensions.includes(extension)
+      ? extension
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+async function findLocalImage(slug) {
+  const basename = safeFilename(slug);
+
+  for (const extension of supportedExtensions) {
+    const filename = `${basename}.${extension}`;
+
+    const filePath = path.join(
+      outputDirectory,
+      filename,
+    );
+
+    try {
+      await access(filePath);
+
+      return {
+        filename,
+        filePath,
+        publicUrl:
+          `/collection-images/${filename}`,
+      };
+    } catch {
+      // Continue avec l’extension suivante.
+    }
+  }
+
+  return null;
+}
+
+async function updateSupabaseImage(
+  slug,
+  publicUrl,
+) {
+  const { error } = await supabase
+    .from("collections")
+    .update({
+      image_url: publicUrl,
+    })
+    .eq("slug", slug);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
+async function downloadImage(imageUrl) {
+  const response = await fetch(imageUrl, {
+    headers: {
+      Accept:
+        "image/avif,image/webp,image/png,image/jpeg,image/*",
+      "User-Agent": "ORDstats/1.0",
+    },
+    signal: AbortSignal.timeout(30_000),
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `Image HTTP ${response.status}: ${imageUrl}`,
+    );
+  }
+
+  const contentType = (
+    response.headers.get("content-type") ?? ""
+  )
+    .split(";")[0]
+    .trim()
+    .toLowerCase();
+
+  const extension =
+    extensionFromContentType(contentType) ??
+    extensionFromUrl(imageUrl);
+
+  if (!extension) {
+    throw new Error(
+      `Unsupported image type "${contentType || "unknown"}": ` +
+        imageUrl,
+    );
+  }
+
+  if (
+    contentType.startsWith("text/") ||
+    contentType.includes("json") ||
+    contentType.includes("javascript")
+  ) {
+    throw new Error(
+      `The image URL returned ${contentType}: ${imageUrl}`,
+    );
+  }
+
+  const buffer = Buffer.from(
+    await response.arrayBuffer(),
+  );
+
+  if (buffer.length < 32) {
+    throw new Error(
+      `Downloaded image is empty or invalid: ${imageUrl}`,
+    );
+  }
+
+  return {
+    buffer,
+    extension,
+    contentType,
+  };
+}
+
+const downloaded = [];
+const published = [];
+const preserved = [];
 const missing = [];
 const failed = [];
 
 for (const collection of catalog.collections) {
+  const label =
+    `#${collection.rank} ${collection.slug}`;
+
   try {
-    const { data: existing, error: existingError } =
-      await supabase
-        .from("collections")
-        .select("image_url")
-        .eq("slug", collection.slug)
-        .maybeSingle();
+    const existingLocal =
+      await findLocalImage(collection.slug);
 
-    if (existingError) {
-      throw new Error(existingError.message);
-    }
+    if (mode === "publish") {
+      if (!existingLocal) {
+        missing.push({
+          rank: collection.rank,
+          slug: collection.slug,
+          reason: "local file missing",
+        });
 
-    /*
-     * Une image locale est une correction manuelle :
-     * elle ne doit jamais être remplacée par ord.net.
-     */
-    if (existing?.image_url?.startsWith("/")) {
+        continue;
+      }
+
+      await updateSupabaseImage(
+        collection.slug,
+        existingLocal.publicUrl,
+      );
+
+      published.push({
+        rank: collection.rank,
+        slug: collection.slug,
+        imageUrl: existingLocal.publicUrl,
+      });
+
       console.log(
-        `#${collection.rank} ${collection.slug} ` +
-          `→ local image preserved`,
+        `${label} → ${existingLocal.publicUrl}`,
       );
 
       continue;
     }
-    const response = await fetch(collection.url, {
-      headers: {
-        Accept: "text/html",
-        "User-Agent": "ORDstats/1.0",
-      },
-    });
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
-    }
-
-    const html = await response.text();
-
-    const name =
-      collection.name
-        .replace(/^\d+\s+/, "")
-        .split(/\s{2,}/)[0]
-        .trim();
-
-    const imageUrl = extractCollectionImage(
-      html,
-      name,
-    );
-
-    if (!imageUrl) {
-      missing.push({
+    if (existingLocal && !force) {
+      preserved.push({
         rank: collection.rank,
         slug: collection.slug,
+        imageUrl: existingLocal.publicUrl,
       });
+
+      console.log(
+        `${label} → local file preserved`,
+      );
+
+      if (mode === "sync") {
+        await updateSupabaseImage(
+          collection.slug,
+          existingLocal.publicUrl,
+        );
+
+        published.push({
+          rank: collection.rank,
+          slug: collection.slug,
+          imageUrl: existingLocal.publicUrl,
+        });
+      }
+
       continue;
     }
 
-    const { error } = await supabase
-      .from("collections")
-      .update({
-        image_url: imageUrl,
-      })
-      .eq("slug", collection.slug);
+    const pageResponse = await fetch(
+      collection.url,
+      {
+        headers: {
+          Accept: "text/html",
+          "User-Agent": "ORDstats/1.0",
+        },
+        signal: AbortSignal.timeout(30_000),
+      },
+    );
 
-    if (error) {
-      throw new Error(error.message);
+    if (!pageResponse.ok) {
+      throw new Error(
+        `Collection page HTTP ${pageResponse.status}`,
+      );
     }
 
-    updated.push({
+    const html = await pageResponse.text();
+
+    const name = collection.name
+      .replace(/^\d+\s+/, "")
+      .split(/\s{2,}/)[0]
+      .trim();
+
+    const extractedUrl =
+      extractCollectionImage(html, name);
+
+    if (!extractedUrl) {
+      missing.push({
+        rank: collection.rank,
+        slug: collection.slug,
+        reason: "image URL not found",
+      });
+
+      continue;
+    }
+
+    const absoluteImageUrl = new URL(
+      extractedUrl,
+      collection.url,
+    ).href;
+
+    const {
+      buffer,
+      extension,
+      contentType,
+    } = await downloadImage(absoluteImageUrl);
+
+    const filename =
+      `${safeFilename(collection.slug)}.${extension}`;
+
+    const filePath = path.join(
+      outputDirectory,
+      filename,
+    );
+
+    const publicUrl =
+      `/collection-images/${filename}`;
+
+    await writeFile(filePath, buffer);
+
+    downloaded.push({
       rank: collection.rank,
       slug: collection.slug,
-      imageUrl,
+      imageUrl: absoluteImageUrl,
+      localUrl: publicUrl,
+      contentType,
+      bytes: buffer.length,
     });
 
     console.log(
-      `#${collection.rank} ${collection.slug} → ${imageUrl}`,
+      `${label} → ${publicUrl} ` +
+        `(${Math.round(buffer.length / 1024)} kB)`,
     );
+
+    if (mode === "sync") {
+      await updateSupabaseImage(
+        collection.slug,
+        publicUrl,
+      );
+
+      published.push({
+        rank: collection.rank,
+        slug: collection.slug,
+        imageUrl: publicUrl,
+      });
+    }
   } catch (error) {
     failed.push({
       rank: collection.rank,
@@ -166,19 +443,30 @@ for (const collection of catalog.collections) {
           ? error.message
           : String(error),
     });
+
+    console.error(
+      `${label} → ERROR: ${
+        error instanceof Error
+          ? error.message
+          : String(error)
+      }`,
+    );
   }
 }
 
 console.log("");
-console.log("ORDstats image synchronization");
-console.log("--------------------------------");
-console.log(`Updated: ${updated.length}`);
-console.log(`Missing: ${missing.length}`);
-console.log(`Failed:  ${failed.length}`);
+console.log("ORDstats local image synchronization");
+console.log("------------------------------------");
+console.log(`Mode:       ${mode}`);
+console.log(`Downloaded: ${downloaded.length}`);
+console.log(`Preserved:  ${preserved.length}`);
+console.log(`Published:  ${published.length}`);
+console.log(`Missing:    ${missing.length}`);
+console.log(`Failed:     ${failed.length}`);
 
 if (missing.length > 0) {
   console.log("");
-  console.log("No image found:");
+  console.log("Images missing:");
   console.table(missing);
 }
 

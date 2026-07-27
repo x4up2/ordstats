@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- BlockForge Identities logo. ViewBox-only (no width/height attrs) so the
+     consumer's CSS controls the rendered size. The img tag in the loading
+     screen scales it via `width: min(220px, 65vw); height: auto;` and the
+     SVG's 300:200 viewBox aspect ratio handles the rest. -->
+<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <!-- BlockForge cube's 3 face textures (top / left / right) — applied as
+         pattern fills on the flat bust below so the Identity silhouette
+         carries the BlockForge brand surface without changing its shape. -->
+    <pattern id="bfi-top" width="20" height="20" patternUnits="userSpaceOnUse" patternTransform="rotate(0) scale(0.5,0.5)">
+      <rect width="20" height="20" fill="#1c0a37"/>
+      <rect x="3"  y="3"  width="3" height="3" fill="#b43cff"/>
+      <rect x="14" y="8"  width="3" height="3" fill="#b43cff"/>
+      <rect x="8"  y="16" width="3" height="3" fill="#b43cff"/>
+    </pattern>
+    <pattern id="bfi-left" width="20" height="20" patternUnits="userSpaceOnUse" patternTransform="skewY(0) scale(0.33, 0.33)">
+      <rect width="20" height="20" fill="#b43cff"/>
+
+    </pattern>
+    <pattern id="bfi-right" width="20" height="20" patternUnits="userSpaceOnUse" patternTransform="skewY(0) scale(0.33, 0.33)">
+      <rect width="20" height="20" fill="#c8aaff"/>
+    </pattern>
+  </defs>
+
+  <!-- ===== HEAD (flat voxel — solid magenta) ===== -->
+  <g shape-rendering="crispEdges">
+    <rect x="120" y="14" width="60" height="60" fill="#b43cff"/>
+    <rect x="167" y="20" width="13" height="50" fill="#c8aaff"/>           <!-- right highlight -->
+    <rect x="120" y="24" width="6"  height="46" fill="#4a2080"/>           <!-- left shadow -->
+    <rect x="120" y="14" width="60" height="4"  fill="#ff00c8"/>           <!-- crown rim -->
+    <rect x="130" y="38" width="13" height="13" fill="#1c0a37"/>
+    <rect x="157" y="38" width="13" height="13" fill="#1c0a37"/>
+    <rect x="132" y="40" width="5"  height="5"  fill="#ff00c8"/>
+    <rect x="159" y="40" width="5"  height="5"  fill="#ff00c8"/>
+  </g>
+
+  <!-- ===== BUST (flat rectangular, straight-on) — the 3 BlockForge cube
+       textures applied to the existing layered rects. Main fills use the
+       bright "top" texture; the shadow / highlight stripes carry the left
+       and right cube textures, so all three appear without changing the
+       silhouette's shape. -->
+  <g shape-rendering="crispEdges">
+    <!-- Neck -->
+    <rect x="138" y="74" width="24" height="12" fill="#6a30b0"/>
+    <!-- Shoulders bar — top cube texture (bright magenta) -->
+    <rect x="85"  y="86"  width="130" height="22" fill="url(#bfi-top)"/>
+    <rect x="85"  y="86"  width="10"   height="22" fill="url(#bfi-left)"/>   <!-- left shadow cap -->
+    <rect x="205" y="86"  width="10"   height="22" fill="url(#bfi-right)"/>  <!-- right highlight cap -->
+    <!-- Chest — top texture main body, side textures as shadow/highlight stripes -->
+    <rect x="98"  y="108" width="104" height="68" fill="url(#bfi-top)"/>
+    <rect x="98"  y="108" width="10"   height="68" fill="url(#bfi-left)"/>   <!-- left shadow stripe -->
+    <rect x="192" y="108" width="10"  height="68" fill="url(#bfi-right)"/>  <!-- right highlight stripe -->
+  </g>
+
+  <!-- B / F chest emblem — the brand mark migrated to the silhouette. Deep
+       purple B on the left half, lavender F on the right (same hue pairing
+       the parent logo uses across its two visible cube faces). Subtle dark
+       stroke keeps them legible against the busy textured chest. -->
+  <text x="116" y="158" font-family="monospace" font-weight="bold" font-size="38"
+        fill="#b43cff" stroke="#b43cff" stroke-width="0.0">B</text>
+  <text x="158" y="158" font-family="monospace" font-weight="bold" font-size="38"
+        fill="#c8aaff" stroke="#c8aaff" stroke-width="0.0" opacity="0.95">F</text>
+
+
+</svg>

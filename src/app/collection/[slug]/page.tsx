@@ -116,7 +116,7 @@ export default async function CollectionPage({
 
   const imageUrl =
     collection.image_url ??
-    `https://render.ord.net/v5/snapshots/${collection.source_id}/512.webp`;
+    "/ordstats-mark.png";
 
   const ownershipEvenness =
     advanced && ownership.holdingAddresses > 0

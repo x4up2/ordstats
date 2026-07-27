@@ -59,7 +59,7 @@ export default async function Home() {
           collection.latest_snapshot_at ?? null,
         imageUrl:
           collection.image_url ??
-          `https://render.ord.net/v5/snapshots/${collection.source_id}/512.webp`,
+          "/ordstats-mark.png",
         circulatingSupply: supply.circulating,
         burned: supply.burned,
         holdingAddresses: ownership.holdingAddresses,

@@ -23,13 +23,6 @@ const supabase = createClient(supabaseUrl, supabaseSecret, {
   },
 });
 
-function galleryImageUrl(galleryId) {
-  return (
-    "https://render.ord.net/v5/snapshots/" +
-    `${galleryId}/512.webp`
-  );
-}
-
 async function getCatalogRanking(slug) {
   const catalogPath = path.resolve(
     process.cwd(),
@@ -112,7 +105,6 @@ async function main() {
     name: source.collectionName,
     collection_type: source.collectionType,
     source_id: source.galleryId,
-    image_url: galleryImageUrl(source.galleryId),
     gallery_supply: supply.gallery,
     latest_snapshot_at: generatedAt,
     latest_block_height: blockHeight,
