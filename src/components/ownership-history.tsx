@@ -925,7 +925,9 @@ export default function OwnershipHistory({
             Each tab uses its full calendar window. Empty
             space represents dates not yet observed; lines
             connect recorded observations only. Missing dates
-            are not interpolated or estimated.
+            are not interpolated or estimated. Snapshot dates
+            use Europe/Paris local time (UTC+02 in summer,
+            UTC+01 in winter).
           </p>
         </>
       ) : (
