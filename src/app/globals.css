@@ -4023,3 +4023,39 @@ html {
   }
 }
 
+/* ORDstats History chart axis alignment */
+.history-chart-card {
+  --history-y-axis-width: 44px;
+  --history-y-axis-gap: 6px;
+  --history-y-axis-offset: 27px;
+}
+
+.history-sparkline-layout {
+  margin-left: calc(
+    -1 * var(--history-y-axis-offset)
+  );
+  width: calc(
+    100% + var(--history-y-axis-offset)
+  );
+}
+
+.history-chart-axis {
+  margin-left: calc(
+    var(--history-y-axis-width) +
+    var(--history-y-axis-gap) -
+    var(--history-y-axis-offset)
+  );
+}
+
+.history-sparkline-y-axis {
+  font-size: 10px;
+}
+
+@media (max-width: 640px) {
+  .history-chart-card {
+    --history-y-axis-width: 38px;
+    --history-y-axis-gap: 5px;
+    --history-y-axis-offset: 24px;
+  }
+}
+
