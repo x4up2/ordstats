@@ -4059,3 +4059,9 @@ html {
   }
 }
 
+/* ORDstats History chart right inset */
+.history-sparkline-layout .history-sparkline-wrap,
+.history-chart-axis {
+  margin-right: 4px;
+}
+
