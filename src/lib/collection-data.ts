@@ -145,6 +145,7 @@ export type HistoricalCollectionSnapshot = {
   captured_at: string;
   block_height: number | null;
   holding_addresses: number;
+  single_holders: number;
   advanced_ownership: AdvancedOwnership | null;
 };
 
@@ -233,6 +234,7 @@ const getCachedCollectionSnapshots =
             "captured_at",
             "block_height",
             "holding_addresses",
+            "single_holders",
             "advanced_ownership",
           ].join(","),
         )

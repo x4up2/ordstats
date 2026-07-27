@@ -7,6 +7,7 @@ export type OwnershipHistoryPoint = {
   capturedAt: string;
   blockHeight: number | null;
   holdingAddresses: number;
+  singleHolders: number;
   ownershipEvenness: number | null;
   effectiveHolders: number | null;
   giniCoefficient: number | null;
@@ -22,6 +23,7 @@ type OwnershipHistoryProps = {
 
 type HistoryMetricKey =
   | "holdingAddresses"
+  | "singleHolders"
   | "ownershipEvenness"
   | "effectiveHolders"
   | "giniCoefficient"
@@ -65,6 +67,13 @@ const historyMetricDefinitions: HistoryMetricDefinition[] = [
   {
     key: "holdingAddresses",
     label: "Holding addresses",
+    format: "integer",
+    decimals: 0,
+    deltaSuffix: "",
+  },
+  {
+    key: "singleHolders",
+    label: "Single holders",
     format: "integer",
     decimals: 0,
     deltaSuffix: "",
@@ -120,8 +129,21 @@ const historyMetricDefinitions: HistoryMetricDefinition[] = [
   },
 ];
 
+const summaryMetricKeys: HistoryMetricKey[] = [
+  "holdingAddresses",
+  "ownershipEvenness",
+  "effectiveHolders",
+  "giniCoefficient",
+  "largestHolderShare",
+  "top1SupplyShare",
+  "singleHolderSupplyShare",
+  "averageHolding",
+];
+
 const chartMetricKeys: HistoryMetricKey[] = [
   "holdingAddresses",
+  "singleHolders",
+  "averageHolding",
   "effectiveHolders",
   "giniCoefficient",
   "top1SupplyShare",
@@ -684,9 +706,22 @@ export default function OwnershipHistory({
         )
       : [];
 
-  const chartMetrics =
+  const summaryMetrics =
     availableMetrics.filter((metric) =>
-      chartMetricKeys.includes(metric.key),
+      summaryMetricKeys.includes(metric.key),
+    );
+
+  const chartMetrics = chartMetricKeys
+    .map((key) =>
+      availableMetrics.find(
+        (metric) => metric.key === key,
+      ),
+    )
+    .filter(
+      (
+        metric,
+      ): metric is HistoryMetricDefinition =>
+        metric !== undefined,
     );
 
   const observedDays =
@@ -748,11 +783,11 @@ export default function OwnershipHistory({
 
       {baselinePoint &&
       latestPoint &&
-      availableMetrics.length > 0 ? (
+      summaryMetrics.length > 0 ? (
         <>
           <article className="panel history-panel">
             <div className="history-summary-grid">
-              {availableMetrics.map((metric) => {
+              {summaryMetrics.map((metric) => {
                 const previousValue =
                   getMetricValue(
                     baselinePoint,

@@ -445,6 +445,8 @@ export default async function CollectionPage({
           historicalSnapshot.block_height,
         holdingAddresses:
           historicalHoldingAddresses,
+        singleHolders:
+          historicalSnapshot.single_holders,
         ownershipEvenness:
           historicalEvenness,
         effectiveHolders:
@@ -506,6 +508,8 @@ export default async function CollectionPage({
             collection.latest_block_height,
           holdingAddresses:
             ownership.holdingAddresses,
+          singleHolders:
+            ownership.singleHolders,
           ownershipEvenness,
           effectiveHolders:
             advanced?.effectiveHolders ?? null,
