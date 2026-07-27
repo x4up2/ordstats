@@ -248,6 +248,26 @@ function formatMetricValue(
   });
 }
 
+function calculateDisplayedDelta(
+  previousValue: number,
+  currentValue: number,
+  metric: HistoryMetricDefinition,
+) {
+  const previousDisplayed = Number(
+    previousValue.toFixed(metric.decimals),
+  );
+
+  const currentDisplayed = Number(
+    currentValue.toFixed(metric.decimals),
+  );
+
+  return Number(
+    (
+      currentDisplayed - previousDisplayed
+    ).toFixed(metric.decimals),
+  );
+}
+
 function normalizeDelta(
   delta: number,
   metric: HistoryMetricDefinition,
@@ -752,8 +772,11 @@ export default function OwnershipHistory({
                   return null;
                 }
 
-                const delta =
-                  currentValue - previousValue;
+                const delta = calculateDisplayedDelta(
+                  previousValue,
+                  currentValue,
+                  metric,
+                );
 
                 return (
                   <div
@@ -831,8 +854,11 @@ export default function OwnershipHistory({
                   return null;
                 }
 
-                const delta =
-                  currentValue - previousValue;
+                const delta = calculateDisplayedDelta(
+                  previousValue,
+                  currentValue,
+                  metric,
+                );
 
                 return (
                   <article
