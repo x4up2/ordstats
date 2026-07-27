@@ -3938,3 +3938,31 @@ html {
 .lorenz-chart {
   overflow: visible;
 }
+
+/* ORDstats History six-metric layout */
+.history-summary-grid-six {
+  grid-template-columns: repeat(
+    3,
+    minmax(0, 1fr)
+  );
+}
+
+.history-chart-period-tabs {
+  margin-top: 24px;
+}
+
+@media (max-width: 900px) {
+  .history-summary-grid-six {
+    grid-template-columns: repeat(
+      2,
+      minmax(0, 1fr)
+    );
+  }
+}
+
+@media (max-width: 640px) {
+  .history-summary-grid-six {
+    grid-template-columns: 1fr;
+  }
+}
+

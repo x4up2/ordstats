@@ -48,18 +48,49 @@ type HistoryMetricDefinition = {
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
-const periodOptions = [
+const comparisonPeriodOptions = [
   {
     days: 1,
     label: "1 DAY",
+    requiresFullWindow: false,
   },
   {
     days: 7,
     label: "7 DAYS",
+    requiresFullWindow: false,
   },
   {
     days: 30,
     label: "30 DAYS",
+    requiresFullWindow: false,
+  },
+  {
+    days: 180,
+    label: "6 MONTHS",
+    requiresFullWindow: true,
+  },
+  {
+    days: 365,
+    label: "1 YEAR",
+    requiresFullWindow: true,
+  },
+] as const;
+
+const chartPeriodOptions = [
+  {
+    days: 30,
+    label: "30 DAYS",
+    requiresFullWindow: false,
+  },
+  {
+    days: 180,
+    label: "6 MONTHS",
+    requiresFullWindow: true,
+  },
+  {
+    days: 365,
+    label: "1 YEAR",
+    requiresFullWindow: true,
   },
 ] as const;
 
@@ -136,8 +167,6 @@ const historyDisplayMetricKeys: HistoryMetricKey[] = [
   "effectiveHolders",
   "giniCoefficient",
   "top1SupplyShare",
-  "ownershipEvenness",
-  "singleHolderSupplyShare",
 ];
 
 function parseSnapshotDate(snapshotDate: string) {
@@ -146,6 +175,39 @@ function parseSnapshotDate(snapshotDate: string) {
 
 function getPeriodSpanDays(days: number) {
   return days === 1 ? 1 : days - 1;
+}
+
+function hasFullWindow(
+  points: OwnershipHistoryPoint[],
+  days: number,
+) {
+  const earliest = points[0];
+  const latest = points.at(-1);
+
+  if (!earliest || !latest) {
+    return false;
+  }
+
+  const earliestDate = parseSnapshotDate(
+    earliest.snapshotDate,
+  );
+
+  const latestDate = parseSnapshotDate(
+    latest.snapshotDate,
+  );
+
+  if (
+    Number.isNaN(earliestDate.getTime()) ||
+    Number.isNaN(latestDate.getTime())
+  ) {
+    return false;
+  }
+
+  const requiredStart =
+    latestDate.getTime() -
+    getPeriodSpanDays(days) * DAY_IN_MS;
+
+  return earliestDate.getTime() <= requiredStart;
 }
 
 function addDaysToSnapshotDate(
@@ -622,6 +684,11 @@ export default function OwnershipHistory({
   const [requestedPeriod, setRequestedPeriod] =
     useState(1);
 
+  const [
+    requestedChartPeriod,
+    setRequestedChartPeriod,
+  ] = useState(30);
+
   const sortedPoints = useMemo(
     () =>
       [...points].sort((left, right) =>
@@ -636,9 +703,16 @@ export default function OwnershipHistory({
 
   const periodStates = useMemo(
     () =>
-      periodOptions.map((period) => {
+      comparisonPeriodOptions.map((period) => {
         const windowStartDate =
           findWindowStartDate(
+            sortedPoints,
+            period.days,
+          );
+
+        const hasRequiredHistory =
+          !period.requiresFullWindow ||
+          hasFullWindow(
             sortedPoints,
             period.days,
           );
@@ -646,10 +720,42 @@ export default function OwnershipHistory({
         return {
           ...period,
           windowStartDate,
-          baseline: findBaseline(
+          baseline: hasRequiredHistory
+            ? findBaseline(
+                sortedPoints,
+                windowStartDate,
+              )
+            : null,
+        };
+      }),
+    [sortedPoints],
+  );
+
+  const chartPeriodStates = useMemo(
+    () =>
+      chartPeriodOptions.map((period) => {
+        const windowStartDate =
+          findWindowStartDate(
             sortedPoints,
-            windowStartDate,
-          ),
+            period.days,
+          );
+
+        const hasRequiredHistory =
+          !period.requiresFullWindow ||
+          hasFullWindow(
+            sortedPoints,
+            period.days,
+          );
+
+        return {
+          ...period,
+          windowStartDate,
+          baseline: hasRequiredHistory
+            ? findBaseline(
+                sortedPoints,
+                windowStartDate,
+              )
+            : null,
         };
       }),
     [sortedPoints],
@@ -682,6 +788,34 @@ export default function OwnershipHistory({
         )
       : [];
 
+  const requestedChartState =
+    chartPeriodStates.find(
+      (period) =>
+        period.days === requestedChartPeriod &&
+        period.baseline,
+    ) ?? null;
+
+  const firstAvailableChartState =
+    chartPeriodStates.find(
+      (period) => period.baseline,
+    ) ?? null;
+
+  const activeChartState =
+    requestedChartState ??
+    firstAvailableChartState;
+
+  const chartBaselinePoint =
+    activeChartState?.baseline ?? null;
+
+  const chartActivePoints =
+    chartBaselinePoint && latestPoint
+      ? sortedPoints.filter(
+          (point) =>
+            point.snapshotDate >=
+            chartBaselinePoint.snapshotDate,
+        )
+      : [];
+
   const availableMetrics =
     baselinePoint && latestPoint
       ? historyMetricDefinitions.filter(
@@ -711,11 +845,34 @@ export default function OwnershipHistory({
           metric !== undefined,
       );
 
-  /*
-   * Le récapitulatif et les graphiques utilisent
-   * les mêmes huit métriques, dans le même ordre.
-   */
-  const chartMetrics = summaryMetrics;
+  const chartAvailableMetrics =
+    chartBaselinePoint && latestPoint
+      ? historyMetricDefinitions.filter(
+          (metric) =>
+            getMetricValue(
+              chartBaselinePoint,
+              metric.key,
+            ) !== null &&
+            getMetricValue(
+              latestPoint,
+              metric.key,
+            ) !== null,
+        )
+      : [];
+
+  const chartMetrics =
+    historyDisplayMetricKeys
+      .map((key) =>
+        chartAvailableMetrics.find(
+          (metric) => metric.key === key,
+        ),
+      )
+      .filter(
+        (
+          metric,
+        ): metric is HistoryMetricDefinition =>
+          metric !== undefined,
+      );
 
   const observedDays =
     baselinePoint && latestPoint
@@ -779,7 +936,7 @@ export default function OwnershipHistory({
       summaryMetrics.length > 0 ? (
         <>
           <article className="panel history-panel">
-            <div className="history-summary-grid">
+            <div className="history-summary-grid history-summary-grid-six">
               {summaryMetrics.map((metric) => {
                 const previousValue =
                   getMetricValue(
@@ -860,101 +1017,149 @@ export default function OwnershipHistory({
             </div>
           </article>
 
-          {chartMetrics.length > 0 ? (
-            <div className="history-chart-grid">
-              {chartMetrics.map((metric) => {
-                const previousValue =
-                  getMetricValue(
-                    baselinePoint,
-                    metric.key,
+          {chartBaselinePoint &&
+          activeChartState &&
+          latestPoint &&
+          chartMetrics.length > 0 ? (
+            <>
+              <div
+                className="history-period-tabs history-chart-period-tabs"
+                aria-label="History chart period"
+              >
+                {chartPeriodStates.map((period) => {
+                  const isAvailable =
+                    period.baseline !== null;
+
+                  const isActive =
+                    activeChartState.days ===
+                    period.days;
+
+                  return (
+                    <button
+                      type="button"
+                      key={period.days}
+                      disabled={!isAvailable}
+                      className={
+                        isActive
+                          ? "history-period-active"
+                          : undefined
+                      }
+                      onClick={() =>
+                        setRequestedChartPeriod(
+                          period.days,
+                        )
+                      }
+                    >
+                      {period.label}
+                    </button>
                   );
+                })}
+              </div>
 
-                const currentValue =
-                  getMetricValue(
-                    latestPoint,
-                    metric.key,
-                  );
+              <div className="history-chart-grid">
+                {chartMetrics.map((metric) => {
+                  const previousValue =
+                    getMetricValue(
+                      chartBaselinePoint,
+                      metric.key,
+                    );
 
-                if (
-                  previousValue === null ||
-                  currentValue === null
-                ) {
-                  return null;
-                }
+                  const currentValue =
+                    getMetricValue(
+                      latestPoint,
+                      metric.key,
+                    );
 
-                const delta = calculateDisplayedDelta(
-                  previousValue,
-                  currentValue,
-                  metric,
-                );
+                  if (
+                    previousValue === null ||
+                    currentValue === null
+                  ) {
+                    return null;
+                  }
 
-                return (
-                  <article
-                    className="history-chart-card"
-                    key={metric.key}
-                  >
-                    <div className="history-chart-heading">
-                      <div>
-                        <span>{metric.label}</span>
+                  const delta =
+                    calculateDisplayedDelta(
+                      previousValue,
+                      currentValue,
+                      metric,
+                    );
 
-                        <strong>
-                          {formatMetricValue(
-                            currentValue,
-                            metric,
-                          )}
-                        </strong>
+                  return (
+                    <article
+                      className="history-chart-card"
+                      key={metric.key}
+                    >
+                      <div className="history-chart-heading">
+                        <div>
+                          <span>{metric.label}</span>
+
+                          <strong>
+                            {formatMetricValue(
+                              currentValue,
+                              metric,
+                            )}
+                          </strong>
+                        </div>
+
+                        <small
+                          className={`history-chart-change history-chart-${deltaTone(delta, metric)}`}
+                        >
+                          {formatDelta(delta, metric)}
+                        </small>
                       </div>
 
-                      <small
-                        className={`history-chart-change history-chart-${deltaTone(delta, metric)}`}
-                      >
-                        {formatDelta(delta, metric)}
-                      </small>
-                    </div>
+                      <Sparkline
+                        points={chartActivePoints}
+                        metric={metric}
+                        periodDays={
+                          activeChartState.days
+                        }
+                        windowStartDate={
+                          activeChartState
+                            .windowStartDate ??
+                          chartBaselinePoint
+                            .snapshotDate
+                        }
+                      />
 
-                    <Sparkline
-                      points={activePoints}
-                      metric={metric}
-                      periodDays={
-                        activeState?.days ?? 1
-                      }
-                      windowStartDate={
-                        activeState?.windowStartDate ??
-                        baselinePoint.snapshotDate
-                      }
-                    />
+                      <div className="history-chart-axis">
+                        <span>
+                          {formatShortDate(
+                            activeChartState
+                              .windowStartDate ??
+                              chartBaselinePoint
+                                .snapshotDate,
+                          )}
+                        </span>
 
-                    <div className="history-chart-axis">
-                      <span>
-                        {formatShortDate(
-                          activeState?.windowStartDate ??
-                            baselinePoint.snapshotDate,
-                        )}
-                      </span>
-
-                      <span>
-                        {formatShortDate(
-                          addDaysToSnapshotDate(
-                            activeState?.windowStartDate ??
-                              baselinePoint.snapshotDate,
-                            getPeriodSpanDays(
-                              activeState?.days ?? 1,
+                        <span>
+                          {formatShortDate(
+                            addDaysToSnapshotDate(
+                              activeChartState
+                                .windowStartDate ??
+                                chartBaselinePoint
+                                  .snapshotDate,
+                              getPeriodSpanDays(
+                                activeChartState.days,
+                              ),
                             ),
-                          ),
-                        )}
-                      </span>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
+                          )}
+                        </span>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            </>
           ) : null}
 
           <p className="history-data-note">
-            Each tab uses its full calendar window. Empty
-            space represents dates not yet observed; lines
-            connect recorded observations only. Missing dates
-            are not interpolated or estimated.
+            Comparison tabs control the figures above.
+            Chart tabs control the graphs independently. Each
+            graph uses its full calendar window. Empty space
+            represents dates not yet observed; lines connect
+            recorded observations only. Missing dates are not
+            interpolated or estimated.
             <br />
             Snapshot dates use Europe/Paris local time (UTC+02
             in summer, UTC+01 in winter).

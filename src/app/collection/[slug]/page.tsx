@@ -107,7 +107,7 @@ export default async function CollectionPage({
   }
 
   const recentSnapshots =
-    await getCollectionSnapshots(slug, 40);
+    await getCollectionSnapshots(slug, 370);
 
   const snapshot = collection.current_ownership;
   const ownership = snapshot.ownership;
