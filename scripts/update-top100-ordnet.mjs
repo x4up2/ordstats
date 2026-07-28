@@ -36,117 +36,173 @@ function deduplicateBySlug(collections) {
 }
 
 async function extractCollections(page) {
-  const candidates = await page.evaluate(() => {
-    const anchors = Array.from(
-      document.querySelectorAll(
-        'main a[href*="/collection/"]',
-      ),
-    );
+  const candidates = await page.evaluate(
+    (collectionLimit) => {
+      const anchors = Array.from(
+        document.querySelectorAll(
+          'main a[href*="/collection/"]',
+        ),
+      );
 
-    return anchors
-      .map((anchor, domIndex) => {
-        const href = anchor.getAttribute("href");
+      return anchors
+        .map((anchor, domIndex) => {
+          const href = anchor.getAttribute("href");
 
-        if (!href) {
-          return null;
-        }
+          if (!href) {
+            return null;
+          }
 
-        const url = new URL(href, window.location.origin);
+          const url = new URL(
+            href,
+            window.location.origin,
+          );
 
-        const match = url.pathname.match(
-          /^\/collection\/([^/?#]+)\/?$/,
-        );
+          const match = url.pathname.match(
+            /^\/collection\/([^/?#]+)\/?$/,
+          );
 
-        if (
-          url.hostname !== "ord.net" ||
-          !match
-        ) {
-          return null;
-        }
+          if (
+            url.hostname !== "ord.net" ||
+            !match
+          ) {
+            return null;
+          }
 
-        let current = anchor;
-        let detectedRank = null;
-
-        /*
-         * Look through the closest parent elements for a row
-         * beginning with an integer ranking number.
-         */
-        for (
-          let depth = 0;
-          depth < 7 && current;
-          depth += 1
-        ) {
-          const text = (
-            current.textContent ?? ""
+          /*
+           * Chaque ligne actuelle du classement ord.net
+           * est elle-même une balise <a> dont le texte
+           * commence directement par son rang.
+           */
+          const rowText = (
+            anchor.textContent ?? ""
           )
             .replace(/\s+/g, " ")
             .trim();
 
-          const rankMatch = text.match(
+          const rankMatch = rowText.match(
             /^(\d{1,3})(?:\s|$)/,
           );
 
-          if (rankMatch) {
-            const possibleRank = Number(rankMatch[1]);
-
-            if (
-              Number.isInteger(possibleRank) &&
-              possibleRank >= 1 &&
-              possibleRank <= 500
-            ) {
-              detectedRank = possibleRank;
-              break;
-            }
+          if (!rankMatch) {
+            return null;
           }
 
-          current = current.parentElement;
-        }
+          const rank = Number(rankMatch[1]);
 
-        const name = (
-          anchor.textContent ?? ""
-        )
-          .replace(/\s+/g, " ")
-          .trim();
+          if (
+            !Number.isInteger(rank) ||
+            rank < 1 ||
+            rank > collectionLimit
+          ) {
+            return null;
+          }
 
-        const slug = decodeURIComponent(match[1]);
+          const slug =
+            decodeURIComponent(match[1]);
 
-        return {
-          rank: detectedRank,
-          domIndex,
-          slug,
-          name: name || slug,
-          url: `https://ord.net/collection/${slug}`,
-        };
-      })
-      .filter(Boolean);
-  });
+          const imageName = (
+            anchor.querySelector("img[alt]")
+              ?.getAttribute("alt") ?? ""
+          ).trim();
 
-  const unique = deduplicateBySlug(candidates);
+          return {
+            rank,
+            domIndex,
+            slug,
+            name: imageName || slug,
+            url:
+              `https://ord.net/collection/${slug}`,
+          };
+        })
+        .filter(Boolean);
+    },
+    COLLECTION_LIMIT,
+  );
 
-  /*
-   * Prefer the ranking number when it can be detected.
-   * Otherwise preserve the order in which links appear.
-   */
-  const ranked = unique
-    .filter(
-      (collection) =>
-        Number.isInteger(collection.rank) &&
-        collection.rank >= 1,
-    )
-    .sort(
-      (left, right) =>
-        left.rank - right.rank ||
-        left.domIndex - right.domIndex,
+  const byRank = new Map();
+  const slugRanks = new Map();
+
+  for (const collection of candidates) {
+    const existingAtRank =
+      byRank.get(collection.rank);
+
+    if (
+      existingAtRank &&
+      existingAtRank.slug !== collection.slug
+    ) {
+      throw new Error(
+        `Conflicting collections detected at rank ` +
+          `${collection.rank}: ` +
+          `${existingAtRank.slug} and ` +
+          `${collection.slug}.`,
+      );
+    }
+
+    const existingSlugRank =
+      slugRanks.get(collection.slug);
+
+    if (
+      existingSlugRank !== undefined &&
+      existingSlugRank !== collection.rank
+    ) {
+      throw new Error(
+        `Collection ${collection.slug} appears at ` +
+          `ranks ${existingSlugRank} and ` +
+          `${collection.rank}.`,
+      );
+    }
+
+    if (!existingAtRank) {
+      byRank.set(
+        collection.rank,
+        collection,
+      );
+    }
+
+    slugRanks.set(
+      collection.slug,
+      collection.rank,
     );
-
-  if (ranked.length >= COLLECTION_LIMIT) {
-    return deduplicateBySlug(ranked);
   }
 
-  return unique.sort(
+  return [...byRank.values()].sort(
     (left, right) =>
-      left.domIndex - right.domIndex,
+      left.rank - right.rank,
   );
+}
+
+function validateTop100(collections) {
+  if (collections.length !== COLLECTION_LIMIT) {
+    throw new Error(
+      `Expected ${COLLECTION_LIMIT} ranked ` +
+        `collections, but detected ` +
+        `${collections.length}.`,
+    );
+  }
+
+  const missingRanks = [];
+
+  for (
+    let rank = 1;
+    rank <= COLLECTION_LIMIT;
+    rank += 1
+  ) {
+    if (
+      !collections.some(
+        (collection) =>
+          collection.rank === rank,
+      )
+    ) {
+      missingRanks.push(rank);
+    }
+  }
+
+  if (missingRanks.length > 0) {
+    throw new Error(
+      `Missing ord.net ranks: ` +
+        `${missingRanks.join(", ")}.`,
+    );
+  }
 }
 
 async function clickLoadMore(page) {
@@ -239,25 +295,18 @@ async function main() {
       }
     }
 
-    collections = (
-      await extractCollections(page)
-    ).slice(0, COLLECTION_LIMIT);
+    collections =
+      await extractCollections(page);
 
-    if (collections.length < COLLECTION_LIMIT) {
-      throw new Error(
-        `Only ${collections.length} collections were detected. ` +
-          `The ord.net page structure may have changed.`,
-      );
-    }
+    validateTop100(collections);
 
-    const normalizedCollections = collections.map(
-      (collection, index) => ({
-        rank: index + 1,
+    const normalizedCollections =
+      collections.map((collection) => ({
+        rank: collection.rank,
         slug: collection.slug,
         name: collection.name,
         url: collection.url,
-      }),
-    );
+      }));
 
     await mkdir(outputDirectory, {
       recursive: true,
