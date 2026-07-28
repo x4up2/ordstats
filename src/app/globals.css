@@ -3346,6 +3346,12 @@ a[href^="http://ord.net"] {
 
 .ord-net-mark {
   font-weight: 700;
+  text-decoration: none;
+}
+
+.ord-net-mark:hover,
+.ord-net-mark:focus-visible {
+  text-decoration: none;
 }
 
 a[href^="https://ord.net"]:hover,

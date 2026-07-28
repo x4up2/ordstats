@@ -105,7 +105,14 @@ export default async function Home() {
               <p className="catalog-hero-description">
                 ORDstats tracks the first 100 collections in the
                 rolling{" "}
-                <span className="ord-net-mark">ord.net</span>{" "}
+                <a
+                  className="ord-net-mark"
+                  href="https://ord.net"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  ord.net
+                </a>{" "}
                 30-day ranking and analyzes their ownership structure
                 every day from an independent local ord index.
               </p>
