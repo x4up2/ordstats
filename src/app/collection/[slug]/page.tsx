@@ -642,7 +642,7 @@ export default async function CollectionPage({
                   Ownership · Advanced snapshot
                 </p>
 
-                <h2>Ownership intelligence</h2>
+                <h2>Ownership analytics</h2>
               </div>
 
               <p className="section-description">

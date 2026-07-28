@@ -1,6 +1,6 @@
 # ORDstats
 
-**Ownership intelligence for Bitcoin Ordinals collections.**
+**Ownership analytics for Bitcoin Ordinals collections.**
 
 ORDstats is an experimental analytics platform that studies how
 inscriptions from major Bitcoin Ordinals collections are distributed

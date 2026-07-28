@@ -88,7 +88,7 @@ export default async function Home() {
         </Link>
 
         <p className="header-label">
-          Ordinals ownership intelligence
+          Ordinals ownership analytics
         </p>
       </header>
 
