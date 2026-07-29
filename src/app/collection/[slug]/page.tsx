@@ -169,6 +169,21 @@ export default async function CollectionPage({
 
   const overviewMetrics = [
     {
+      label: "Circulating supply",
+      value: supply.circulating.toLocaleString("en-US"),
+      detail:
+        supply.burned > 0
+          ? `${supply.unavailable.toLocaleString(
+              "en-US",
+            )} unavailable, including ${supply.burned.toLocaleString(
+              "en-US",
+            )} burned`
+          : `${supply.unavailable.toLocaleString(
+              "en-US",
+            )} unavailable`,
+      status: "snapshot" as const,
+    },
+    {
       label: "Holding addresses",
       value: ownership.holdingAddresses.toLocaleString(
         "en-US",
@@ -255,21 +270,6 @@ export default async function CollectionPage({
           },
         ]),
 
-    {
-      label: "Circulating supply",
-      value: supply.circulating.toLocaleString("en-US"),
-      detail:
-        supply.burned > 0
-          ? `${supply.unavailable.toLocaleString(
-              "en-US",
-            )} unavailable, including ${supply.burned.toLocaleString(
-              "en-US",
-            )} burned`
-          : `${supply.unavailable.toLocaleString(
-              "en-US",
-            )} unavailable`,
-      status: "snapshot" as const,
-    },
   ];
 
   const concentrationRows = [
