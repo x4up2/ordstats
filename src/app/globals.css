@@ -4112,3 +4112,12 @@ html {
   }
 }
 
+
+/* HOME DIRECTORY — ARROW POSITION */
+.directory-arrow {
+  transform: translateX(-10px);
+}
+
+.directory-row:hover .directory-arrow {
+  transform: translateX(-7px);
+}
