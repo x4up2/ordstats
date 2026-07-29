@@ -197,10 +197,7 @@ export default async function CollectionPage({
     {
       label: "Single holders",
       value: `${ownership.singleHolderRate}%`,
-      detail:
-        `${ownership.singleHolders.toLocaleString(
-          "en-US",
-        )} addresses hold one piece`,
+      detail: "Of holding addresses",
       status: "snapshot" as const,
     },
 
@@ -233,10 +230,7 @@ export default async function CollectionPage({
           {
             label: "Single-holder supply",
             value: `${advanced.singleHolderSupply.share}%`,
-            detail:
-              `${advanced.singleHolderSupply.inscriptions.toLocaleString(
-                "en-US",
-              )} inscriptions held by one-piece addresses`,
+            detail: "Of circulating supply",
             status: "snapshot" as const,
           },
         ]
