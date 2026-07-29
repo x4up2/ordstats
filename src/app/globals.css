@@ -4134,7 +4134,7 @@ html {
       minmax(105px, 0.8fr)
       minmax(95px, 0.75fr)
       minmax(165px, 1.1fr)
-      12px;
+      18px;
     column-gap: 24px;
   }
 
@@ -4147,12 +4147,16 @@ html {
   }
 
   .directory-arrow {
-    justify-self: center;
+    width: 100%;
+    display: grid;
+    place-items: center;
+    justify-self: stretch;
+    font-size: 16px;
     transform: none;
   }
 
   .directory-row:hover .directory-arrow {
-    transform: translateX(2px);
+    transform: none;
   }
 }
 
