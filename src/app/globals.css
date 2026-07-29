@@ -4147,12 +4147,20 @@ html {
   }
 
   .directory-arrow {
-    width: 100%;
-    display: grid;
-    place-items: center;
+    grid-column: 7 / 9;
+    grid-row: 1;
+    align-self: stretch;
     justify-self: stretch;
+    width: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    padding-left: 92px;
+    margin-right: -18px;
     font-size: 16px;
     transform: none;
+    pointer-events: none;
   }
 
   .directory-row:hover .directory-arrow {
