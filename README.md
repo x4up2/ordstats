@@ -2,44 +2,75 @@
 
 **Ownership analytics for Bitcoin Ordinals collections.**
 
-ORDstats is an experimental analytics platform that studies how
-inscriptions from major Bitcoin Ordinals collections are distributed
-across on-chain addresses.
+[ORDstats](https://www.ordstats.net) is an experimental analytics
+platform that studies how inscriptions from major Bitcoin Ordinals
+collections are distributed across on-chain addresses.
 
-It tracks the first 100 collections in the rolling 30-day `ord.net`
-ranking, computes ownership snapshots from an independent local `ord`
-index, stores the resulting metrics in Supabase and publishes
-collection reports through a Next.js application.
+It follows the first 100 collections in the rolling 30-day
+[`ord.net`](https://ord.net) ranking, computes ownership snapshots
+from an independent local `ord` index, stores the resulting data in
+Supabase and publishes collection reports through a Next.js
+application.
 
 ORDstats focuses on ownership structure. It does not provide market
-prices, trading signals, collection valuations or investment advice.
+prices, collection valuations, trading signals or investment advice.
+
+## Public application
+
+```text
+https://www.ordstats.net
+```
+
+The public website can operate independently from the indexing
+machine because it reads previously published data from Supabase.
 
 ## What ORDstats provides
 
-The public collection directory includes:
+### Collection directory
+
+The homepage displays the active Top 100 in current `ord.net`
+30-day ranking order.
+
+It provides:
 
 - dynamic search by collection name or slug;
-- the current `ord.net` rolling 30-day rank;
+- current `ord.net` rolling 30-day rank;
 - circulating supply;
 - number of holding addresses;
 - single-holder rate;
-- Gini coefficient;
+- average holding per address;
 - effective-holder count;
 - Top 1% supply concentration;
-- the date and time of the latest snapshot.
+- latest snapshot date;
+- Bitcoin block associated with the snapshot.
 
-Each collection report provides a more detailed ownership analysis.
+The homepage intentionally prioritizes immediately understandable
+metrics. More technical indicators, including the Gini coefficient,
+remain available in individual collection reports.
 
 ### Collection overview
 
-- holding addresses;
-- single holders;
-- average and median holdings;
-- largest holder;
-- single-holder supply;
-- circulating and unavailable supply.
+Each collection page begins with six primary metrics, presented in
+the following order:
+
+1. circulating supply;
+2. holding addresses;
+3. single holders;
+4. average holding;
+5. largest holder;
+6. single-holder supply.
+
+`Single holders` and `Single-holder supply` describe different
+proportions:
+
+- **Single holders** is the share of holding addresses that own
+  exactly one inscription;
+- **Single-holder supply** is the share of circulating supply held
+  by those one-piece addresses.
 
 ### Advanced ownership metrics
+
+Collection reports can also include:
 
 - ownership evenness;
 - effective holders;
@@ -48,7 +79,8 @@ Each collection report provides a more detailed ownership analysis.
 - whale-tier supply;
 - multi-holder supply;
 - largest-holder multiple;
-- holding-size and supply distributions;
+- holding-size distribution;
+- supply distribution;
 - Lorenz curve;
 - holding percentiles;
 - fixed-address concentration;
@@ -56,44 +88,117 @@ Each collection report provides a more detailed ownership analysis.
 
 ### Ownership history
 
-Daily snapshots allow ORDstats to display:
+Daily observations are stored separately from the current collection
+state.
 
-- 1-day, 7-day and 30-day comparisons;
-- changes in key ownership metrics;
-- daily trend charts for holding addresses, effective holders,
-  Gini coefficient and Top 1% supply.
+As sufficient history becomes available, ORDstats displays comparison
+windows and trend charts for:
 
-Historical charts connect recorded observations only. Missing dates
-are not estimated or interpolated.
+- holding addresses;
+- single holders;
+- average holding;
+- effective holders;
+- Gini coefficient;
+- Top 1% supply concentration.
+
+Historical charts connect actual recorded observations only. Missing
+dates are never estimated or interpolated.
+
+## Data methodology
+
+### Average holding
+
+Average holding is calculated as:
+
+```text
+circulating supply / holding addresses
+```
+
+It represents the average number of circulating inscriptions held per
+address.
+
+### Effective holders
+
+Effective holders estimates how many equally sized holders would
+produce the observed ownership distribution.
+
+It decreases when ownership becomes more concentrated and increases
+when supply is distributed more evenly.
+
+### Gini coefficient
+
+The Gini coefficient summarizes ownership inequality across holding
+addresses.
+
+A lower value indicates a more even address-level distribution. A
+higher value indicates stronger concentration.
+
+### Largest-holder multiple
+
+The largest-holder multiple compares the largest address balance with
+the collection-wide average holding.
+
+### Address-level interpretation
+
+All ownership metrics are calculated at Bitcoin address level.
+
+A Bitcoin address does not necessarily represent one person. One
+person or entity may control several addresses, while one address may
+represent:
+
+- a marketplace;
+- a custodian;
+- a shared wallet;
+- an escrow system;
+- a protocol-controlled address.
+
+ORDstats therefore measures address-level distribution, not verified
+human ownership.
 
 ## Architecture
 
-ORDstats has three distinct layers.
+ORDstats has three main layers.
 
 ### 1. Local indexing and calculation
 
 A locally operated Bitcoin `ord` server provides inscription and
-ownership information.
+ownership information through its JSON API.
 
-Node.js scripts:
+The local pipeline:
 
-1. read the current collection catalogue;
-2. query the local `ord` JSON API;
-3. calculate ownership and concentration metrics;
-4. create a dated collection snapshot;
-5. publish the current state and historical observation to Supabase.
+1. retrieves the current `ord.net` rolling Top 100;
+2. validates explicit rank values;
+3. synchronizes ranks and active catalogue status;
+4. indexes newly ranked collections;
+5. refreshes active collections in rank order;
+6. calculates ownership and concentration metrics;
+7. creates dated snapshots;
+8. publishes current and historical data to Supabase;
+9. synchronizes collection artwork;
+10. produces an execution report.
 
-The Bitcoin node, the `ord` index and their data directories are not
-part of this repository.
+The rank scraper accepts only explicit ranks from 1 to 100. It aborts
+when ranks are missing, duplicated or conflicting and never silently
+falls back to HTML document order.
+
+Active collections are refreshed by ascending `ord_rank_30d`, so
+snapshot times progress in the same general order as the public
+ranking.
+
+The Bitcoin node, `ord` index and their data directories are not part
+of this repository.
 
 ### 2. Supabase storage
 
 Supabase stores:
 
 - the public collection catalogue;
+- active and inactive catalogue status;
+- current `ord.net` ranks;
 - each collection's latest ownership state;
 - advanced ownership metrics;
-- one historical snapshot per collection and calendar date.
+- one historical observation per collection and calendar date;
+- references to collection artwork.
 
 Historical snapshots are upserted using the pair:
 
@@ -107,30 +212,34 @@ This preserves one canonical observation per collection per day.
 
 The public interface is built with:
 
-- Next.js;
-- React;
+- Next.js 16;
+- React 19;
 - TypeScript;
 - Supabase JavaScript client;
 - server components for data loading;
-- small client components for search and history controls.
+- client components for search, date formatting and history controls;
+- Vercel Analytics;
+- Vercel Speed Insights.
+
+The hosted application is deployed on Vercel.
 
 Public collection data is cached briefly by the application. A newly
-uploaded snapshot may therefore take a few minutes to appear.
+published snapshot may therefore take a few minutes to appear.
 
 ## Requirements
 
-A complete local installation requires:
+A complete local indexing installation requires:
 
 - Node.js and npm;
 - a synchronized Bitcoin node;
-- a working `ord` index with its JSON API enabled;
+- a working `ord` index;
+- the `ord` JSON API enabled;
 - a Supabase project;
 - access to the required Supabase tables;
 - sufficient disk space for the Bitcoin and `ord` indexes.
 
-The web application can be deployed separately from the local
-indexing machine, provided that it can read the published Supabase
-data.
+The web application can be deployed separately from the indexing
+machine, provided that it can read the published Supabase data.
 
 ## Environment variables
 
@@ -140,7 +249,7 @@ Copy the example file:
 cp .env.example .env.local
 ```
 
-Then provide the following values:
+Then provide:
 
 ```dotenv
 ORD_BASE_URL=http://127.0.0.1
@@ -148,7 +257,7 @@ SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_SECRET_KEY=your-server-side-secret
 ```
 
-### Important security rule
+### Security rule
 
 `SUPABASE_SECRET_KEY` is a privileged server-side credential.
 
@@ -182,20 +291,20 @@ Open:
 http://localhost:3000
 ```
 
-Production checks:
+Run the production checks:
 
 ```bash
 npm run lint
 npm run build
 ```
 
-Run the production server:
+Start the production application:
 
 ```bash
 npm run start
 ```
 
-## Available commands
+## Available npm commands
 
 | Command | Purpose |
 | --- | --- |
@@ -203,26 +312,83 @@ npm run start
 | `npm run build` | Create a production build |
 | `npm run start` | Start the production application |
 | `npm run lint` | Run ESLint |
-| `npm run snapshot:ownership` | Generate ownership data for a collection |
+| `npm run snapshot:ownership` | Generate ownership data for one collection |
 | `npm run upload:snapshot` | Publish a generated snapshot to Supabase |
 | `npm run index:collection` | Index and publish one collection |
-| `npm run refresh:all` | Refresh active indexed collections |
-| `npm run catalog:update:100` | Retrieve and synchronize the rolling Top 100 |
-| `npm run catalog:index` | Index newly ranked collections |
-| `npm run catalog:sync` | Synchronize catalogue ranks and active status |
-| `npm run catalog:images` | Synchronize collection images |
+| `npm run refresh:all` | Refresh all active collections in ranking order |
+| `npm run catalog:update:100` | Retrieve, validate and synchronize the rolling Top 100 |
+| `npm run catalog:index` | Index collections newly added to the catalogue |
+| `npm run catalog:sync` | Synchronize ranks and active catalogue status |
+| `npm run catalog:images` | Download or publish collection artwork |
+| `npm run catalog:update` | Legacy Top 50 catalogue command |
 
-These data-pipeline commands require a correctly configured local
-`ord` server and `.env.local`.
+The data-pipeline commands require a correctly configured local `ord`
+server and `.env.local`.
+
+## Collection image synchronization
+
+Collection artwork is stored under:
+
+```text
+public/collection-images/
+```
+
+Useful modes include:
+
+```bash
+npm run catalog:images -- --download-only
+npm run catalog:images -- --publish-local
+npm run catalog:images -- --force
+```
+
+The publication helper:
+
+```text
+scripts/publish-catalog-images.sh
+```
+
+can:
+
+1. download missing artwork;
+2. detect newly created image files;
+3. create an image-only Git commit;
+4. push the commit to the deployment branch;
+5. wait for the files to become available on Vercel;
+6. publish the deployed local image URLs to Supabase.
+
+The helper aborts rather than modifying Git when:
+
+- staged changes already exist;
+- the current branch is not the expected deployment branch;
+- the local branch is not aligned with its remote;
+- GitHub cannot be reached;
+- the deployment does not make the image available.
+
+## Refresh reliability
+
+`scripts/refresh-all.mjs` processes collections sequentially.
+
+A failed collection does not immediately terminate the complete
+refresh. The script performs:
+
+1. the normal collection pass;
+2. a second pass after a short delay;
+3. a final pass after a longer delay.
+
+Only collections that failed the preceding pass are retried.
+
+The current retry delays are two minutes and ten minutes. Remaining
+failures are reported at the end of the run.
+
+A collection completed during a retry may have a later snapshot time
+than neighbouring ranks.
 
 ## Daily automation on macOS
 
-The production instance currently uses a local macOS `launchd` task.
+The reference production setup uses a local macOS `launchd` task,
+scheduled once per day.
 
-The real machine-specific script is intentionally excluded from Git
-because it contains local filesystem and executable paths.
-
-A public template is provided:
+A public wrapper template is provided:
 
 ```bash
 cp \
@@ -230,40 +396,50 @@ cp \
   scripts/refresh-all-launchd.sh
 ```
 
-Edit the copied file to match the local installation before creating
-a corresponding file in:
+The machine-specific wrapper is intentionally excluded from Git
+because it contains local filesystem and executable paths.
 
-```text
-~/Library/LaunchAgents/
-```
+A typical wrapper:
 
-The scheduler should only run while:
+1. creates an individual log for the run;
+2. maintains a link to the latest log;
+3. prevents overlapping executions with a PID lock;
+4. waits for the local `ord` service;
+5. updates the catalogue;
+6. indexes newly ranked collections;
+7. refreshes active collections;
+8. publishes collection images;
+9. records the final execution status;
+10. optionally sends an e-mail report.
+
+The scheduler should run only while:
 
 - the Mac is available;
 - the Bitcoin node is synchronized;
 - the `ord` server is running;
-- the external disk containing the index is mounted;
-- the required environment variables are present.
+- the disk containing the indexes is mounted;
+- required environment variables are available.
+
+## Optional e-mail reports
+
+`scripts/send-refresh-email.py` can send a success or failure report
+through Gmail SMTP.
+
+The report includes:
+
+- the final pipeline status;
+- start and completion times;
+- the last lines of the execution log;
+- the complete log as an attachment;
+- automatic compression for large log files.
+
+The Gmail application password must be stored in macOS Keychain. It
+must not be written into the script, repository, launchd property list
+or log files.
+
+Failure to send the report does not change the actual indexing result.
 
 ## Methodological limitations
-
-ORDstats metrics must be interpreted with care.
-
-### Addresses are not people
-
-A Bitcoin address does not necessarily represent one individual owner.
-
-One person or entity may control several addresses. Conversely, an
-address may represent:
-
-- a marketplace;
-- a custodian;
-- a shared wallet;
-- an escrow system;
-- a protocol-controlled address.
-
-ORDstats therefore measures address-level distribution, not verified
-human ownership.
 
 ### Snapshots are observations
 
@@ -280,217 +456,69 @@ Changes may reflect:
 - catalogue changes;
 - corrections to collection membership.
 
-### Concentration is not investment quality
+### Concentration is descriptive
 
-A rising or falling concentration metric is descriptive. It is not
-automatically positive or negative and must not be treated as a
-buying or selling signal.
+A rising or falling concentration metric is not automatically positive
+or negative.
+
+Ownership concentration must not be treated as a buying or selling
+signal.
 
 ### Collection membership depends on upstream definitions
 
 ORDstats relies on curated collection definitions and external
-catalogue information. Changes to those sources can affect the
-observed supply and ownership structure.
+catalogue information.
+
+Changes to those sources can affect observed supply and ownership
+structure.
 
 ### No financial advice
 
-ORDstats is a research and data-exploration project. Nothing in the
-application or repository constitutes financial, legal or tax advice.
+ORDstats is a research and data-exploration project.
 
-## Public repository safety
+Nothing in the application or repository constitutes financial,
+legal or tax advice.
 
-The repository is designed so that local operational data remains
-outside Git.
+## Repository safety
 
-The following files are ignored:
+Local operational data and credentials must remain outside Git.
+
+The following content should not be committed:
 
 - `.env` files, except `.env.example`;
-- logs;
-- local indexing work files;
-- generated `ord.net` ranking snapshots;
-- generated ownership snapshots;
+- Supabase secrets;
+- Gmail application passwords;
+- private keys and certificates;
+- execution logs;
+- generated working snapshots;
+- temporary ranking files;
+- local PID and lock files;
 - editor and operating-system files;
 - backup files;
-- private keys and certificates;
-- the machine-specific `launchd` refresh script.
+- the machine-specific launchd wrapper;
+- machine-specific launchd property lists.
 
-### Files requiring an explicit decision
+The following content is intentionally suitable for Git:
 
-The following content is not automatically ignored because it may be
-needed by the application or useful for reproducibility:
+- application source code;
+- public pipeline scripts;
+- `.env.example`;
+- the public launchd wrapper template;
+- collection images required by the deployed application;
+- documentation.
 
-- `public/collections/`;
-- `public/ordstats-mark.png`;
-- application icons and public assets.
-
-Before publishing, review their:
-
-- file size;
-- origin;
-- copyright status;
-- redistribution rights;
-- personal or operational metadata.
-
-Collection artwork may be protected by third-party copyrights even
-when it is publicly viewable on-chain. Do not assume that public
-availability automatically grants redistribution rights.
-
-## Pre-publication checklist
-
-Run these checks immediately before the first public push.
-
-### 1. Review the working tree
+Before each commit, review:
 
 ```bash
 git status --short
-git status --ignored --short
-```
-
-### 2. Confirm that local secrets are ignored
-
-```bash
-git check-ignore -v \
-  .env.local \
-  logs/refresh-all.out.log \
-  scripts/refresh-all-launchd.sh
-```
-
-### 3. Search tracked files for likely secrets
-
-```bash
-git grep -nEI \
-  'sb_secret_|service_role|SUPABASE_SECRET_KEY=.+|BEGIN .*PRIVATE KEY|postgres(ql)?://'
-```
-
-No real credential should be returned. References to
-environment-variable names in source code are normal.
-
-### 4. Search for local personal paths
-
-```bash
-git grep -nE \
-  '/Users/|/Volumes/|C:\\Users\\'
-```
-
-Review every result before publishing.
-
-### 5. Review local assistant and project-instruction files
-
-```bash
-git status --short AGENTS.md CLAUDE.md
-sed -n '1,240p' AGENTS.md
-sed -n '1,240p' CLAUDE.md
-```
-
-Remove them from the public repository when they contain private
-instructions, personal context or machine-specific information.
-
-### 6. Review generated and media files
-
-```bash
-du -sh \
-  data \
-  public/collections \
-  src/data/generated \
-  2>/dev/null
-```
-
-Do not use Git as storage for unnecessarily large generated datasets.
-
-### 7. Check the complete Git history
-
-`.gitignore` only protects future additions. It does not remove a
-secret that was already committed.
-
-```bash
-git log --all --full-history -- .env .env.local
-```
-
-If a secret was ever committed:
-
-1. rotate it immediately;
-2. remove it from Git history;
-3. verify the rewritten history before publishing.
-
-### 8. Validate the project
-
-```bash
-npm run lint
-npm run build
 git diff --check
+git diff
 ```
 
-### 9. Inspect the exact first commit
+## Disclaimer
 
-```bash
-git diff --cached --stat
-git diff --cached
-```
+ORDstats is experimental software.
 
-Never publish using `git add .` without reviewing the staged diff.
-
-### 10. Enable repository protections
-
-For a public GitHub repository, enable:
-
-- secret scanning;
-- push protection;
-- Dependabot alerts;
-- branch protection for the main branch;
-- required review before merging external contributions.
-
-## Deployment notes
-
-Only server-side code should access `SUPABASE_SECRET_KEY`.
-
-For a hosted deployment:
-
-- configure secrets through the hosting provider;
-- never place privileged credentials in repository files;
-- keep the ingestion pipeline on a trusted machine;
-- expose only the public Next.js application;
-- apply appropriate Supabase access controls;
-- review application logs for accidental secret disclosure.
-
-The local Bitcoin and `ord` infrastructure should not be exposed
-directly to the public internet.
-
-## Data and privacy
-
-ORDstats analyzes public Bitcoin blockchain data.
-
-The repository must not include:
-
-- wallet seed phrases;
-- private keys;
-- personally attributed wallet mappings;
-- user IP addresses;
-- private API responses;
-- local system logs containing sensitive information.
-
-## Contributing
-
-Contributions should preserve:
-
-- deterministic metric calculations;
-- clear methodological definitions;
-- strict separation between server and client secrets;
-- reproducible snapshots;
-- explicit handling of unavailable or incomplete data.
-
-Before opening a pull request, run:
-
-```bash
-npm run lint
-npm run build
-```
-
-## License
-
-No open-source license has been selected yet.
-
-Until a `LICENSE` file is added, the source code should not be assumed
-to grant permission for reuse, modification or redistribution.
-
-Choose and add an explicit license before presenting the repository
-as an open-source project.
+Data may be incomplete, delayed or affected by upstream definitions,
+indexing state and software errors. Always verify important
+information independently.
