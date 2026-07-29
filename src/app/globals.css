@@ -4121,3 +4121,38 @@ html {
 .directory-row:hover .directory-arrow {
   transform: translateX(-7px);
 }
+
+/* HOME DIRECTORY — COLUMN BALANCE */
+@media (min-width: 1081px) {
+  .directory-table-header,
+  .directory-row {
+    grid-template-columns:
+      minmax(320px, 2.2fr)
+      minmax(100px, 0.8fr)
+      minmax(115px, 0.9fr)
+      minmax(140px, 1fr)
+      minmax(105px, 0.8fr)
+      minmax(95px, 0.75fr)
+      minmax(165px, 1.1fr)
+      12px;
+    column-gap: 24px;
+  }
+
+  .directory-name {
+    flex: 1 1 auto;
+  }
+
+  .directory-rank {
+    text-align: center;
+  }
+
+  .directory-arrow {
+    justify-self: center;
+    transform: none;
+  }
+
+  .directory-row:hover .directory-arrow {
+    transform: translateX(2px);
+  }
+}
+
