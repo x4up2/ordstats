@@ -4133,8 +4133,8 @@ html {
       minmax(140px, 1fr)
       minmax(105px, 0.8fr)
       minmax(95px, 0.75fr)
-      minmax(165px, 1.1fr)
-      18px;
+      max-content
+      minmax(48px, 1fr);
     column-gap: 24px;
   }
 
@@ -4147,24 +4147,22 @@ html {
   }
 
   .directory-arrow {
-    grid-column: 7 / 9;
-    grid-row: 1;
-    align-self: stretch;
+    grid-column: auto;
+    grid-row: auto;
+    align-self: center;
     justify-self: stretch;
-    width: auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-sizing: border-box;
-    padding-left: 92px;
-    margin-right: -18px;
+    width: 100%;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    margin: 0;
     font-size: 16px;
-    transform: none;
+    transform: translateX(-12px);
     pointer-events: none;
   }
 
   .directory-row:hover .directory-arrow {
-    transform: none;
+    transform: translateX(-12px);
   }
 }
 
