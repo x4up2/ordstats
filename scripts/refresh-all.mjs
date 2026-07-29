@@ -197,8 +197,12 @@ async function loadCollections() {
     error,
   } = await supabase
     .from("collections")
-    .select("slug, name")
+    .select("slug, name, ord_rank_30d")
     .eq("catalog_active", true)
+    .order("ord_rank_30d", {
+      ascending: true,
+      nullsFirst: false,
+    })
     .order("slug", {
       ascending: true,
     });
