@@ -4179,3 +4179,18 @@ html {
   }
 }
 
+
+/* HOME DIRECTORY — HIDE ROW ARROWS ON TOUCH TABLETS */
+@media (
+  min-width: 761px
+) and (
+  max-width: 1400px
+) and (
+  hover: none
+) and (
+  pointer: coarse
+) {
+  .directory-arrow {
+    display: none !important;
+  }
+}
