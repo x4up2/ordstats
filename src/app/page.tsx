@@ -64,8 +64,11 @@ export default async function Home() {
         burned: supply.burned,
         holdingAddresses: ownership.holdingAddresses,
         singleHolderRate: ownership.singleHolderRate,
-        giniCoefficient:
-          advanced?.giniCoefficient ?? null,
+        averageHolding:
+          ownership.holdingAddresses > 0
+            ? supply.circulating /
+              ownership.holdingAddresses
+            : null,
         effectiveHolders:
           advanced?.effectiveHolders ?? null,
         top1SupplyShare:

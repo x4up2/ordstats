@@ -4,10 +4,12 @@ import { useEffect, useState } from "react";
 
 type LocalSnapshotTimeProps = {
   value: string | null;
+  dateOnly?: boolean;
 };
 
 export default function LocalSnapshotTime({
   value,
+  dateOnly = false,
 }: LocalSnapshotTimeProps) {
   const [formatted, setFormatted] = useState("");
 
@@ -24,17 +26,25 @@ export default function LocalSnapshotTime({
       return;
     }
 
-    const formatter = new Intl.DateTimeFormat("en-GB", {
+    const options: Intl.DateTimeFormatOptions = {
       day: "2-digit",
       month: "short",
       year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    });
+    };
+
+    if (!dateOnly) {
+      options.hour = "2-digit";
+      options.minute = "2-digit";
+      options.hour12 = false;
+    }
+
+    const formatter = new Intl.DateTimeFormat(
+      "en-GB",
+      options,
+    );
 
     setFormatted(formatter.format(date));
-  }, [value]);
+  }, [value, dateOnly]);
 
   return (
     <time

@@ -17,7 +17,7 @@ export type CollectionDirectoryItem = {
   burned: number;
   holdingAddresses: number;
   singleHolderRate: number;
-  giniCoefficient: number | null;
+  averageHolding: number | null;
   effectiveHolders: number | null;
   top1SupplyShare: number | null;
 };
@@ -128,7 +128,7 @@ export default function CollectionDirectory({
             <span>Collection</span>
             <span>Supply</span>
             <span>Addresses</span>
-            <span>Gini</span>
+            <span>Average holding</span>
             <span>Effective</span>
             <span>Top 1%</span>
             <span>Snapshot</span>
@@ -163,11 +163,6 @@ export default function CollectionDirectory({
 
                     <span>
                       {collection.collectionType}
-                      {collection.latestBlockHeight !== null
-                        ? ` · block ${collection.latestBlockHeight.toLocaleString(
-                            "en-US",
-                          )}`
-                        : ""}
                     </span>
                   </div>
                 </div>
@@ -206,15 +201,21 @@ export default function CollectionDirectory({
 
                 <div
                   className="directory-value"
-                  data-label="Gini"
+                  data-label="Average holding"
                 >
                   <strong>
-                    {collection.giniCoefficient !== null
-                      ? collection.giniCoefficient.toFixed(3)
+                    {collection.averageHolding !== null
+                      ? collection.averageHolding.toLocaleString(
+                          "en-US",
+                          {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          },
+                        )
                       : "—"}
                   </strong>
 
-                  <span>inequality</span>
+                  <span>per address</span>
                 </div>
 
                 <div
@@ -254,10 +255,17 @@ export default function CollectionDirectory({
                       value={
                         collection.latestSnapshotAt
                       }
+                      dateOnly
                     />
                   </strong>
 
-                  <span>local time</span>
+                  <span>
+                    {collection.latestBlockHeight !== null
+                      ? `Block ${collection.latestBlockHeight.toLocaleString(
+                          "en-US",
+                        )}`
+                      : "Block unavailable"}
+                  </span>
                 </div>
 
                 <span

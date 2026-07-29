@@ -2859,7 +2859,7 @@ body {
     minmax(260px, 2.1fr)
     minmax(90px, 0.75fr)
     minmax(100px, 0.8fr)
-    minmax(70px, 0.55fr)
+    minmax(115px, 0.8fr)
     minmax(90px, 0.7fr)
     minmax(80px, 0.65fr)
     minmax(145px, 1fr)
@@ -2999,7 +2999,7 @@ body {
       minmax(250px, 1.8fr)
       minmax(90px, 0.7fr)
       minmax(100px, 0.75fr)
-      minmax(70px, 0.55fr)
+      minmax(110px, 0.8fr)
       minmax(90px, 0.7fr)
       24px;
   }
