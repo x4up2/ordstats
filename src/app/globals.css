@@ -4271,3 +4271,12 @@ html {
     transform: translateY(0);
   }
 }
+
+/* ORDSTATS — STANDARD ARROW CURSOR */
+.site-frame,
+.site-frame *,
+.dashboard-frame,
+.dashboard-frame * {
+  cursor: default !important;
+}
+
