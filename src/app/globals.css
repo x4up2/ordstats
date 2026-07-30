@@ -4283,6 +4283,8 @@ html {
 
 /* ORDSTATS — POINTER CURSOR FOR LINKS */
 .site-frame a,
-.dashboard-frame a {
+.site-frame a *,
+.dashboard-frame a,
+.dashboard-frame a * {
   cursor: pointer !important;
 }
