@@ -4280,3 +4280,9 @@ html {
   cursor: default !important;
 }
 
+
+/* ORDSTATS — POINTER CURSOR FOR LINKS */
+.site-frame a,
+.dashboard-frame a {
+  cursor: pointer !important;
+}
