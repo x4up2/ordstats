@@ -4296,3 +4296,8 @@ html {
 .bitcoin-tip-button * {
   cursor: pointer !important;
 }
+
+/* ORDSTATS — TEXT CURSOR IN HOMEPAGE SEARCH */
+.site-frame .directory-search input[type="search"] {
+  cursor: text !important;
+}
