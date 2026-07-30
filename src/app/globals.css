@@ -4246,3 +4246,15 @@ html {
   }
 }
 
+
+/* HOME DIRECTORY — TOOLTIP REFINEMENT */
+@media (hover: hover) and (pointer: fine) {
+  .directory-header-tooltip {
+    cursor: default;
+  }
+
+  .directory-header-tooltip::after {
+    font-size: 11px;
+    line-height: 1.5;
+  }
+}
