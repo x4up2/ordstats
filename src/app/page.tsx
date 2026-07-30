@@ -69,8 +69,8 @@ export default async function Home() {
             ? supply.circulating /
               ownership.holdingAddresses
             : null,
-        effectiveHolders:
-          advanced?.effectiveHolders ?? null,
+        giniCoefficient:
+          advanced?.giniCoefficient ?? null,
         top1SupplyShare:
           advanced?.topHolderGroups.top1Percent.share ??
           null,

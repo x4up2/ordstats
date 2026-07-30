@@ -18,7 +18,7 @@ export type CollectionDirectoryItem = {
   holdingAddresses: number;
   singleHolderRate: number;
   averageHolding: number | null;
-  effectiveHolders: number | null;
+  giniCoefficient: number | null;
   top1SupplyShare: number | null;
 };
 
@@ -129,7 +129,7 @@ export default function CollectionDirectory({
             <span>Supply</span>
             <span>Addresses</span>
             <span>Average holding</span>
-            <span>Effective</span>
+            <span>Gini</span>
             <span>Top 1%</span>
             <span>Snapshot</span>
           </div>
@@ -220,17 +220,15 @@ export default function CollectionDirectory({
 
                 <div
                   className="directory-value"
-                  data-label="Effective"
+                  data-label="Gini"
                 >
                   <strong>
-                    {collection.effectiveHolders !== null
-                      ? Math.round(
-                          collection.effectiveHolders,
-                        ).toLocaleString("en-US")
+                    {collection.giniCoefficient !== null
+                      ? collection.giniCoefficient.toFixed(3)
                       : "—"}
                   </strong>
 
-                  <span>holders</span>
+                  <span>inequality</span>
                 </div>
 
                 <div
