@@ -125,13 +125,54 @@ export default function CollectionDirectory({
             className="directory-table-header"
             aria-hidden="true"
           >
-            <span>Collection</span>
-            <span>Supply</span>
-            <span>Addresses</span>
-            <span>Average holding</span>
-            <span>Gini</span>
-            <span>Top 1%</span>
-            <span>Snapshot</span>
+            <span
+              className="directory-header-tooltip"
+              data-tooltip="Collection name and current 30-day rank on ord.net."
+            >
+              Collection
+            </span>
+
+            <span
+              className="directory-header-tooltip"
+              data-tooltip="Circulating inscriptions currently available in the collection."
+            >
+              Supply
+            </span>
+
+            <span
+              className="directory-header-tooltip"
+              data-tooltip="Bitcoin addresses holding at least one inscription from the collection."
+            >
+              Addresses
+            </span>
+
+            <span
+              className="directory-header-tooltip"
+              data-tooltip="Average number of circulating inscriptions held per holding address."
+            >
+              Average holding
+            </span>
+
+            <span
+              className="directory-header-tooltip"
+              data-tooltip="Ownership inequality across holding addresses. 0 is more even; 1 is more concentrated."
+            >
+              Gini
+            </span>
+
+            <span
+              className="directory-header-tooltip"
+              data-tooltip="Share of circulating supply held by the largest 1% of holding addresses."
+            >
+              Top 1%
+            </span>
+
+            <span
+              className="directory-header-tooltip"
+              data-tooltip="Date and Bitcoin block used for the latest ownership calculation."
+            >
+              Snapshot
+            </span>
           </div>
 
           <div className="directory-body">

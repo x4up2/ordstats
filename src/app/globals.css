@@ -4194,3 +4194,55 @@ html {
     display: none !important;
   }
 }
+
+/* HOME DIRECTORY — HEADER TOOLTIPS */
+@media (hover: hover) and (pointer: fine) {
+  .directory-header-tooltip {
+    position: relative;
+    overflow: visible;
+  }
+
+  .directory-header-tooltip::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    z-index: 50;
+    width: max-content;
+    max-width: 240px;
+    padding: 8px 10px;
+    border: 1px solid var(--border-strong);
+    background: rgba(6, 13, 24, 0.98);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: normal;
+    line-height: 1.45;
+    text-align: left;
+    text-transform: none;
+    white-space: normal;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-3px);
+    transition:
+      opacity 90ms ease,
+      transform 90ms ease,
+      visibility 0s linear 90ms;
+    pointer-events: none;
+  }
+
+  .directory-header-tooltip:hover::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    transition-delay: 0s;
+  }
+
+  .directory-table-header
+    > .directory-header-tooltip:nth-last-child(-n + 2)::after {
+    right: 0;
+    left: auto;
+  }
+}
+
