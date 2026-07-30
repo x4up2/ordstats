@@ -633,9 +633,18 @@ function Sparkline({
         const isLatest =
           index === coordinates.length - 1;
 
-        const modifier = isLatest
-          ? " history-sparkline-point-latest"
-          : "";
+        const isHovered =
+          hoveredPointIndex === index;
+
+        const modifier = `${
+          isLatest
+            ? " history-sparkline-point-latest"
+            : ""
+        }${
+          isHovered
+            ? " history-sparkline-point-hovered"
+            : ""
+        }`;
 
         return (
           <g

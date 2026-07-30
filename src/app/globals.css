@@ -4301,3 +4301,13 @@ html {
 .site-frame .directory-search input[type="search"] {
   cursor: text !important;
 }
+
+/* ORDSTATS — RED HOVERED HISTORY POINT */
+.history-sparkline-point {
+  transition: stroke 90ms ease;
+}
+
+.history-sparkline-point.history-sparkline-point-hovered {
+  stroke: var(--ordnet-red, #ff4d57);
+}
+
