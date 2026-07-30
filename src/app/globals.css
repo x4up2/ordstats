@@ -4288,3 +4288,11 @@ html {
 .dashboard-frame a * {
   cursor: pointer !important;
 }
+
+/* ORDSTATS — EXPLICIT POINTERS FOR PRIMARY ACTIONS */
+.site-header .wordmark,
+.site-header .wordmark *,
+.bitcoin-tip-button,
+.bitcoin-tip-button * {
+  cursor: pointer !important;
+}
