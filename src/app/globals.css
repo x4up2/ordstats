@@ -4258,3 +4258,16 @@ html {
     line-height: 1.5;
   }
 }
+
+/* HOME DIRECTORY — TOOLTIPS ABOVE HEADERS */
+@media (hover: hover) and (pointer: fine) {
+  .directory-header-tooltip::after {
+    top: auto;
+    bottom: calc(100% + 10px);
+    transform: translateY(3px);
+  }
+
+  .directory-header-tooltip:hover::after {
+    transform: translateY(0);
+  }
+}
