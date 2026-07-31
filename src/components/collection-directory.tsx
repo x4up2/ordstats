@@ -134,7 +134,7 @@ export default function CollectionDirectory({
 
             <span
               className="directory-header-tooltip"
-              data-tooltip="Circulating inscriptions currently available in the collection."
+              data-tooltip="Circulating inscriptions currently available in the collection. An inscription is considered burned when its sat is spent to an unspendable OP_RETURN output."
             >
               Supply
             </span>
