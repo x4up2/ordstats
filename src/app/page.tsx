@@ -79,7 +79,7 @@ export default async function Home() {
   );
 
   return (
-    <div className="site-frame">
+    <div className="site-frame dashboard-frame">
       <header className="site-header shell">
         <Link
           className="wordmark"
