@@ -24,7 +24,7 @@ export const metadata: Metadata = {
       "Daily ownership analytics for the Top 100 Ordinals collections.",
     images: [
       {
-        url: "/ordstats-social-card.png",
+        url: "/ordstats-social-card.png?v=2",
         width: 1200,
         height: 630,
         alt: "ORDstats — Ordinals ownership analytics",
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     title: "ORDstats — Ordinals ownership analytics",
     description:
       "Daily ownership analytics for the Top 100 Ordinals collections.",
-    images: ["/ordstats-social-card.png"],
+    images: ["/ordstats-social-card.png?v=2"],
   },
 };
 

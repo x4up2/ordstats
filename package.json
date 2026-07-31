@@ -15,7 +15,8 @@
     "catalog:index": "node --env-file=.env.local scripts/index-catalog.mjs",
     "catalog:update:100": "node scripts/update-top100-ordnet.mjs && node --env-file=.env.local scripts/sync-catalog-ranking.mjs",
     "catalog:sync": "node --env-file=.env.local scripts/sync-catalog-ranking.mjs",
-    "catalog:images": "node --env-file=.env.local scripts/sync-catalog-images.mjs"
+    "catalog:images": "node --env-file=.env.local scripts/sync-catalog-images.mjs",
+    "social-card": "node scripts/generate-social-card.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.110.8",
