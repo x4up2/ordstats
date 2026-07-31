@@ -4311,3 +4311,12 @@ html {
   stroke: var(--ordnet-red, #ff4d57);
 }
 
+/* ORDSTATS — ADAPTIVE COLLECTION IMAGE RENDERING */
+.artwork-image-smooth {
+  image-rendering: auto !important;
+}
+
+.artwork-image-pixelated {
+  image-rendering: pixelated !important;
+}
+

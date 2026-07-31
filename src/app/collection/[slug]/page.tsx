@@ -1,5 +1,5 @@
 import SiteFooter from "@/components/site-footer";
-import Image from "next/image";
+import AdaptiveCollectionImage from "@/components/adaptive-collection-image";
 import Link from "next/link";
 import LocalSnapshotTime from "@/components/local-snapshot-time";
 import { MetricCard } from "@/components/metric-card";
@@ -564,7 +564,7 @@ export default async function CollectionPage({
         <section className="collection-heading">
           <div className="collection-identity">
             <div className="collection-artwork">
-              <Image
+              <AdaptiveCollectionImage
                 src={imageUrl}
                 alt={`${collection.name} collection artwork`}
                 width={300}

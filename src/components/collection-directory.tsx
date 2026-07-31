@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Image from "next/image";
+import AdaptiveCollectionImage from "@/components/adaptive-collection-image";
 import Link from "next/link";
 import LocalSnapshotTime from "@/components/local-snapshot-time";
 
@@ -190,7 +190,7 @@ export default function CollectionDirectory({
                   </span>
 
                   <div className="directory-artwork">
-                    <Image
+                    <AdaptiveCollectionImage
                       src={collection.imageUrl}
                       alt=""
                       width={58}
