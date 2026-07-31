@@ -697,8 +697,8 @@ export default async function CollectionPage({
                   <p>
                     The number of equally weighted holders that would
                     produce the same concentration as the observed
-                    distribution. It is calculated as the inverse of
-                    the Herfindahl–Hirschman Index.
+                    distribution. A higher value indicates broader
+                    distribution; a lower value indicates greater concentration.
                   </p>
                 </details>
 
