@@ -1389,7 +1389,7 @@ body {
   height: 100%;
   display: block;
   object-fit: cover;
-  image-rendering: pixelated;
+  image-rendering: auto;
 }
 
 .collection-copy {
@@ -1710,7 +1710,7 @@ body {
   height: 100%;
   display: block;
   object-fit: cover;
-  image-rendering: pixelated;
+  image-rendering: auto;
 }
 
 .collection-card-content {
@@ -2933,7 +2933,7 @@ body {
   height: 100%;
   display: block;
   object-fit: cover;
-  image-rendering: pixelated;
+  image-rendering: auto;
 }
 
 .directory-name {
