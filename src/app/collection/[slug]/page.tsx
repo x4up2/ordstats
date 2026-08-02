@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+
 import SiteFooter from "@/components/site-footer";
 import AdaptiveCollectionImage from "@/components/adaptive-collection-image";
 import Link from "next/link";
@@ -28,6 +30,77 @@ function humanizeSlug(slug: string) {
         word.charAt(0).toUpperCase() + word.slice(1),
     )
     .join(" ");
+}
+
+export async function generateMetadata({
+  params,
+}: CollectionPageProps): Promise<Metadata> {
+  const { slug: encodedSlug } = await params;
+  const slug = decodeURIComponent(
+    encodedSlug,
+  ).toLowerCase();
+
+  const collection = await getPublicCollection(slug);
+
+  const canonicalPath =
+    `/collection/${encodeURIComponent(slug)}`;
+
+  if (!collection) {
+    const fallbackName = humanizeSlug(slug);
+
+    return {
+      title: `${fallbackName} — Collection not indexed`,
+      description:
+        `ORDstats has no ownership snapshot for ${fallbackName}.`,
+      alternates: {
+        canonical: canonicalPath,
+      },
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
+  }
+
+  const description =
+    `Daily ownership analytics and holder distribution metrics for ${collection.name}.`;
+
+  const socialTitle =
+    `${collection.name} — Ordinals ownership analytics`;
+
+  return {
+    title: collection.name,
+    description,
+
+    alternates: {
+      canonical: canonicalPath,
+    },
+
+    openGraph: {
+      type: "website",
+      url: canonicalPath,
+      siteName: "ORDstats",
+      title: socialTitle,
+      description,
+      images: [
+        {
+          url: "/ordstats-social-card.png?v=2",
+          width: 1200,
+          height: 630,
+          alt: socialTitle,
+        },
+      ],
+    },
+
+    twitter: {
+      card: "summary_large_image",
+      title: socialTitle,
+      description,
+      images: [
+        "/ordstats-social-card.png?v=2",
+      ],
+    },
+  };
 }
 
 export default async function CollectionPage({

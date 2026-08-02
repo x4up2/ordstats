@@ -15,6 +15,10 @@ export const metadata: Metadata = {
   description:
     "Daily ownership analytics for the Top 100 Ordinals collections.",
 
+  alternates: {
+    canonical: "/",
+  },
+
   openGraph: {
     type: "website",
     url: "https://www.ordstats.net",
