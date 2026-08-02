@@ -298,31 +298,65 @@ function formatMetricValue(
 function formatAxisValue(
   value: number,
   metric: HistoryMetricDefinition,
+  decimals = metric.decimals,
 ) {
   if (metric.format === "integer") {
-    const decimals = Number.isInteger(value) ? 0 : 1;
-
-    return value.toLocaleString("en-US", {
-      minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals,
-    });
+    return Math.round(value).toLocaleString("en-US");
   }
 
   if (metric.format === "gini") {
-    return value.toFixed(3);
+    return value.toFixed(decimals);
   }
 
   if (metric.format === "percent") {
     return `${value.toLocaleString("en-US", {
-      minimumFractionDigits: metric.decimals,
-      maximumFractionDigits: metric.decimals,
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
     })}%`;
   }
 
   return value.toLocaleString("en-US", {
     minimumFractionDigits: 0,
-    maximumFractionDigits: metric.decimals,
+    maximumFractionDigits: decimals,
   });
+}
+
+function getAxisDecimals(
+  minimumValue: number,
+  maximumValue: number,
+  metric: HistoryMetricDefinition,
+) {
+  if (
+    metric.format === "integer" ||
+    maximumValue === minimumValue
+  ) {
+    return metric.decimals;
+  }
+
+  const middleValue =
+    (maximumValue + minimumValue) / 2;
+
+  const axisValues = [
+    maximumValue,
+    middleValue,
+    minimumValue,
+  ];
+
+  let decimals = metric.decimals;
+
+  while (decimals < 8) {
+    const labels = axisValues.map((value) =>
+      formatAxisValue(value, metric, decimals),
+    );
+
+    if (new Set(labels).size === labels.length) {
+      return decimals;
+    }
+
+    decimals += 1;
+  }
+
+  return decimals;
 }
 
 function formatShortDate(
@@ -444,9 +478,7 @@ function Sparkline({
     (observation) => observation.value,
   );
 
-  const chartValues = values.map((value) =>
-    Number(value.toFixed(metric.decimals)),
-  );
+  const chartValues = values;
 
   const parsedWindowStart =
     parseSnapshotDate(windowStartDate).getTime();
@@ -465,18 +497,64 @@ function Sparkline({
   const middleValue =
     (maximumValue + minimumValue) / 2;
 
+  const axisDecimals = getAxisDecimals(
+    minimumValue,
+    maximumValue,
+    metric,
+  );
+
+  const integerMiddleValue =
+    Math.round(middleValue);
+
+  const integerMiddleLabel =
+    integerMiddleValue > minimumValue &&
+    integerMiddleValue < maximumValue
+      ? formatAxisValue(
+          integerMiddleValue,
+          metric,
+        )
+      : "";
+
   const yAxisLabels =
     maximumValue === minimumValue
       ? [
           "",
-          formatAxisValue(maximumValue, metric),
+          formatAxisValue(
+            maximumValue,
+            metric,
+            axisDecimals,
+          ),
           "",
         ]
-      : [
-          formatAxisValue(maximumValue, metric),
-          formatAxisValue(middleValue, metric),
-          formatAxisValue(minimumValue, metric),
-        ];
+      : metric.format === "integer"
+        ? [
+            formatAxisValue(
+              maximumValue,
+              metric,
+            ),
+            integerMiddleLabel,
+            formatAxisValue(
+              minimumValue,
+              metric,
+            ),
+          ]
+        : [
+            formatAxisValue(
+              maximumValue,
+              metric,
+              axisDecimals,
+            ),
+            formatAxisValue(
+              middleValue,
+              metric,
+              axisDecimals,
+            ),
+            formatAxisValue(
+              minimumValue,
+              metric,
+              axisDecimals,
+            ),
+          ];
 
   const xAxisPositions = [
     0,
