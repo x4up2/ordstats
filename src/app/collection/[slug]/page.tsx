@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import SiteFooter from "@/components/site-footer";
+import DistributionHealth from "@/components/distribution-health";
 import AdaptiveCollectionImage from "@/components/adaptive-collection-image";
 import Link from "next/link";
 import LocalSnapshotTime from "@/components/local-snapshot-time";
@@ -12,6 +13,7 @@ import {
   getCollectionSnapshots,
   getPublicCollection,
 } from "@/lib/collection-data";
+import { calculateDistributionHealth } from "@/lib/distribution-health";
 
 type CollectionPageProps = {
   params: Promise<{
@@ -604,6 +606,13 @@ export default async function CollectionPage({
     ),
   );
 
+  const distributionHealth =
+    calculateDistributionHealth({
+      ownership,
+      advanced,
+      historyPoints,
+    });
+
   return (
     <div className="site-frame dashboard-frame">
       <header className="site-header shell">
@@ -688,6 +697,12 @@ export default async function CollectionPage({
             <p>Data served from Supabase</p>
           </div>
         </section>
+
+        {distributionHealth ? (
+          <DistributionHealth
+            result={distributionHealth}
+          />
+        ) : null}
 
         <section
           className="metric-grid"
