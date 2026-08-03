@@ -4684,10 +4684,21 @@ html {
 }
 
 .directory-health span {
-  color:
+  width: fit-content;
+  padding: 3px 6px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 5px;
+  background:
     var(
       --directory-health-color,
       var(--text)
-    ) !important;
-  opacity: 0.86;
+    );
+  color: #07101a !important;
+  font-size: 0.59rem !important;
+  font-weight: 800;
+  letter-spacing: 0.035em !important;
+  line-height: 1.05;
+  white-space: nowrap;
+  opacity: 1;
 }
