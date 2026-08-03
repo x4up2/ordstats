@@ -149,6 +149,19 @@ export type HistoricalCollectionSnapshot = {
   advanced_ownership: AdvancedOwnership | null;
 };
 
+
+export type DirectoryHealthSnapshot = {
+  collection_slug: string;
+  snapshot_date: string;
+  captured_at: string;
+  holding_addresses: number;
+  gini_coefficient: number | string | null;
+  effective_holders: number | string | null;
+  largest_holder_share: number | string | null;
+  top1_supply_share: number | string | null;
+  single_holder_supply_share: number | string | null;
+};
+
 const collectionFields = [
   "slug",
   "name",
@@ -285,5 +298,97 @@ export async function getCollectionSnapshots(
   return getCachedCollectionSnapshots(
     normalizedSlug,
     safeLimit,
+  );
+}
+
+const getCachedRecentCollectionSnapshotsForDirectory =
+  unstable_cache(
+    async (
+      days: number,
+    ): Promise<DirectoryHealthSnapshot[]> => {
+      const safeDays = Math.max(
+        30,
+        Math.min(days, 60),
+      );
+
+      /*
+       * Two extra calendar days protect the 30-day window around
+       * UTC/Europe-Paris date boundaries.
+       */
+      const cutoffDate = new Date(
+        Date.now() -
+          (safeDays + 2) * 86_400_000,
+      )
+        .toISOString()
+        .slice(0, 10);
+
+      const pageSize = 1_000;
+      const snapshots: DirectoryHealthSnapshot[] = [];
+
+      for (
+        let offset = 0;
+        offset < 10_000;
+        offset += pageSize
+      ) {
+        const { data, error } = await supabaseServer
+          .from("collection_snapshots")
+          .select(
+            [
+              "collection_slug",
+              "snapshot_date",
+              "captured_at",
+              "holding_addresses",
+              "gini_coefficient:advanced_ownership->>giniCoefficient",
+              "effective_holders:advanced_ownership->>effectiveHolders",
+              "largest_holder_share:advanced_ownership->largestHolder->>share",
+              "top1_supply_share:advanced_ownership->topHolderGroups->top1Percent->>share",
+              "single_holder_supply_share:advanced_ownership->singleHolderSupply->>share",
+            ].join(","),
+          )
+          .gte("snapshot_date", cutoffDate)
+          .order("captured_at", {
+            ascending: true,
+          })
+          .range(
+            offset,
+            offset + pageSize - 1,
+          )
+          .overrideTypes<
+            DirectoryHealthSnapshot[],
+            { merge: false }
+          >();
+
+        if (error) {
+          throw new Error(
+            `Unable to read recent directory history: ${error.message}`,
+          );
+        }
+
+        const page = data ?? [];
+        snapshots.push(...page);
+
+        if (page.length < pageSize) {
+          break;
+        }
+      }
+
+      return snapshots;
+    },
+    ["ordstats-directory-recent-history"],
+    {
+      revalidate: 300,
+    },
+  );
+
+export async function getRecentCollectionSnapshotsForDirectory(
+  days = 40,
+): Promise<DirectoryHealthSnapshot[]> {
+  const safeDays = Math.max(
+    30,
+    Math.min(days, 60),
+  );
+
+  return getCachedRecentCollectionSnapshotsForDirectory(
+    safeDays,
   );
 }

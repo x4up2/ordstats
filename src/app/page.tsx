@@ -2,10 +2,84 @@ import SiteFooter from "@/components/site-footer";
 import Image from "next/image";
 import Link from "next/link";
 import CollectionDirectory from "@/components/collection-directory";
-import { getPublicCollections } from "@/lib/collection-data";
+import {
+  getPublicCollections,
+  getRecentCollectionSnapshotsForDirectory,
+} from "@/lib/collection-data";
+import {
+  calculateDistributionHealth,
+  getDistributionHealthColor,
+  type DistributionHealthHistoryPoint,
+} from "@/lib/distribution-health";
+
+function toFiniteNumber(
+  value: number | string | null,
+) {
+  if (
+    typeof value === "number" &&
+    Number.isFinite(value)
+  ) {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    const parsed = Number(value);
+
+    return Number.isFinite(parsed)
+      ? parsed
+      : null;
+  }
+
+  return null;
+}
+
+function getParisSnapshotDate(
+  capturedAt: string | null,
+) {
+  if (!capturedAt) {
+    return null;
+  }
+
+  const date = new Date(capturedAt);
+
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Europe/Paris",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    })
+      .formatToParts(date)
+      .filter(
+        (part) => part.type !== "literal",
+      )
+      .map(
+        (part) => [
+          part.type,
+          part.value,
+        ],
+      ),
+  );
+
+  return (
+    `${parts.year}-` +
+    `${parts.month}-` +
+    `${parts.day}`
+  );
+}
 
 export default async function Home() {
-  const collections = await getPublicCollections();
+  const [
+    collections,
+    recentSnapshots,
+  ] = await Promise.all([
+    getPublicCollections(),
+    getRecentCollectionSnapshotsForDirectory(40),
+  ]);
 
   const activeCollections = collections.filter(
     (collection) => collection.catalog_active,
@@ -36,6 +110,24 @@ export default async function Home() {
     return left.name.localeCompare(right.name);
   });
 
+  const snapshotsBySlug = new Map<
+    string,
+    (typeof recentSnapshots)[number][]
+  >();
+
+  recentSnapshots.forEach((snapshot) => {
+    const snapshots =
+      snapshotsBySlug.get(
+        snapshot.collection_slug,
+      ) ?? [];
+
+    snapshots.push(snapshot);
+    snapshotsBySlug.set(
+      snapshot.collection_slug,
+      snapshots,
+    );
+  });
+
   const directoryCollections = orderedCollections.map(
     (collection) => {
       const ownership =
@@ -46,6 +138,128 @@ export default async function Home() {
 
       const advanced =
         collection.advanced_ownership;
+
+      const healthHistoryByDate =
+        new Map<
+          string,
+          DistributionHealthHistoryPoint
+        >();
+
+      const collectionSnapshots =
+        snapshotsBySlug.get(
+          collection.slug,
+        ) ?? [];
+
+      collectionSnapshots.forEach(
+        (historicalSnapshot) => {
+          const historicalHoldingAddresses =
+            historicalSnapshot.holding_addresses;
+
+          const historicalEffectiveHolders =
+            toFiniteNumber(
+              historicalSnapshot.effective_holders,
+            );
+
+          const historicalEvenness =
+            historicalEffectiveHolders !== null &&
+            historicalHoldingAddresses > 0
+              ? Math.min(
+                  100,
+                  Math.max(
+                    0,
+                    (
+                      historicalEffectiveHolders /
+                      historicalHoldingAddresses
+                    ) * 100,
+                  ),
+                )
+              : null;
+
+          healthHistoryByDate.set(
+            historicalSnapshot.snapshot_date,
+            {
+              snapshotDate:
+                historicalSnapshot.snapshot_date,
+              holdingAddresses:
+                historicalHoldingAddresses,
+              ownershipEvenness:
+                historicalEvenness,
+              giniCoefficient:
+                toFiniteNumber(
+                  historicalSnapshot.gini_coefficient,
+                ),
+              largestHolderShare:
+                toFiniteNumber(
+                  historicalSnapshot.largest_holder_share,
+                ),
+              top1SupplyShare:
+                toFiniteNumber(
+                  historicalSnapshot.top1_supply_share,
+                ),
+              singleHolderSupplyShare:
+                toFiniteNumber(
+                  historicalSnapshot.single_holder_supply_share,
+                ),
+            },
+          );
+        },
+      );
+
+      const currentSnapshotDate =
+        getParisSnapshotDate(
+          collection.latest_snapshot_at,
+        );
+
+      if (currentSnapshotDate) {
+        const currentEvenness =
+          advanced &&
+          ownership.holdingAddresses > 0
+            ? Math.min(
+                100,
+                Math.max(
+                  0,
+                  (
+                    advanced.effectiveHolders /
+                    ownership.holdingAddresses
+                  ) * 100,
+                ),
+              )
+            : null;
+
+        healthHistoryByDate.set(
+          currentSnapshotDate,
+          {
+            snapshotDate: currentSnapshotDate,
+            holdingAddresses:
+              ownership.holdingAddresses,
+            ownershipEvenness:
+              currentEvenness,
+            giniCoefficient:
+              advanced?.giniCoefficient ?? null,
+            largestHolderShare:
+              advanced?.largestHolder.share ?? null,
+            top1SupplyShare:
+              advanced?.topHolderGroups
+                .top1Percent.share ?? null,
+            singleHolderSupplyShare:
+              advanced?.singleHolderSupply.share ??
+              null,
+          },
+        );
+      }
+
+      const distributionHealth =
+        calculateDistributionHealth({
+          ownership,
+          advanced,
+          historyPoints: Array.from(
+            healthHistoryByDate.values(),
+          ).sort((left, right) =>
+            left.snapshotDate.localeCompare(
+              right.snapshotDate,
+            ),
+          ),
+        });
 
       return {
         slug: collection.slug,
@@ -71,9 +285,16 @@ export default async function Home() {
             : null,
         giniCoefficient:
           advanced?.giniCoefficient ?? null,
-        top1SupplyShare:
-          advanced?.topHolderGroups.top1Percent.share ??
-          null,
+        distributionHealthScore:
+          distributionHealth?.score ?? null,
+        distributionHealthLabel:
+          distributionHealth?.label ?? null,
+        distributionHealthColor:
+          distributionHealth
+            ? getDistributionHealthColor(
+                distributionHealth.score,
+              )
+            : null,
       };
     },
   );

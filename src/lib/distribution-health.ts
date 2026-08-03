@@ -786,3 +786,73 @@ export function calculateDistributionHealth({
     trendMetrics,
   };
 }
+
+const distributionHealthColorStops = [
+  [0, "#ff4d57"],
+  [30, "#ff8a4c"],
+  [52, "#f0ca4d"],
+  [75, "#82cf63"],
+  [100, "#2ed573"],
+] as const;
+
+function parseHexColor(hex: string) {
+  const normalized = hex.replace("#", "");
+
+  return {
+    red: Number.parseInt(normalized.slice(0, 2), 16),
+    green: Number.parseInt(normalized.slice(2, 4), 16),
+    blue: Number.parseInt(normalized.slice(4, 6), 16),
+  };
+}
+
+export function getDistributionHealthColor(
+  score: number,
+) {
+  const safeScore = clamp(score);
+
+  for (
+    let index = 0;
+    index < distributionHealthColorStops.length - 1;
+    index += 1
+  ) {
+    const current =
+      distributionHealthColorStops[index];
+    const next =
+      distributionHealthColorStops[index + 1];
+
+    if (
+      safeScore >= current[0] &&
+      safeScore <= next[0]
+    ) {
+      const progress =
+        (safeScore - current[0]) /
+        (next[0] - current[0]);
+
+      const currentColor =
+        parseHexColor(current[1]);
+      const nextColor =
+        parseHexColor(next[1]);
+
+      const red = Math.round(
+        currentColor.red +
+          progress *
+            (nextColor.red - currentColor.red),
+      );
+      const green = Math.round(
+        currentColor.green +
+          progress *
+            (nextColor.green - currentColor.green),
+      );
+      const blue = Math.round(
+        currentColor.blue +
+          progress *
+            (nextColor.blue - currentColor.blue),
+      );
+
+      return `rgb(${red}, ${green}, ${blue})`;
+    }
+  }
+
+  return distributionHealthColorStops.at(-1)?.[1] ??
+    "#2ed573";
+}

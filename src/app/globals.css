@@ -2861,9 +2861,8 @@ body {
     minmax(115px, 0.9fr)
     minmax(140px, 1fr)
     minmax(105px, 0.8fr)
-    minmax(95px, 0.75fr)
-    minmax(165px, 1.1fr)
-    24px;
+    minmax(135px, 0.95fr)
+    minmax(165px, 1.1fr);
   align-items: center;
   column-gap: 28px;
 }
@@ -2978,20 +2977,6 @@ body {
   line-height: 1.35;
 }
 
-.directory-arrow {
-  color: var(--blue-label);
-  font-size: 18px;
-  opacity: 0.55;
-  transition:
-    opacity 150ms ease,
-    transform 150ms ease;
-}
-
-.directory-row:hover .directory-arrow {
-  opacity: 1;
-  transform: translateX(3px);
-}
-
 @media (max-width: 1080px) {
   .directory-table-header,
   .directory-row {
@@ -2999,14 +2984,13 @@ body {
       minmax(250px, 1.8fr)
       minmax(90px, 0.7fr)
       minmax(100px, 0.75fr)
-      minmax(110px, 0.8fr)
-      minmax(90px, 0.7fr)
-      24px;
+      minmax(120px, 0.85fr)
+      minmax(120px, 0.9fr);
   }
 
-  .directory-table-header > :nth-child(6),
+  .directory-table-header > :nth-child(5),
   .directory-table-header > :nth-child(7),
-  .directory-row > :nth-child(6),
+  .directory-row > :nth-child(5),
   .directory-row > :nth-child(7) {
     display: none;
   }
@@ -3041,8 +3025,7 @@ body {
     min-height: 106px;
     grid-template-columns:
       minmax(0, 1fr)
-      minmax(72px, auto)
-      18px;
+      minmax(72px, auto);
     gap: 16px;
     padding: 15px;
   }
@@ -4126,15 +4109,6 @@ html {
 }
 
 
-/* HOME DIRECTORY — ARROW POSITION */
-.directory-arrow {
-  transform: translateX(-10px);
-}
-
-.directory-row:hover .directory-arrow {
-  transform: translateX(-7px);
-}
-
 /* HOME DIRECTORY — COLUMN BALANCE */
 @media (min-width: 1081px) {
   .directory-table-header,
@@ -4145,9 +4119,8 @@ html {
       minmax(115px, 0.9fr)
       minmax(125px, 0.9fr)
       minmax(105px, 0.8fr)
-      minmax(95px, 0.75fr)
-      max-content
-      minmax(48px, 1fr);
+      minmax(135px, 0.95fr)
+      max-content;
     column-gap: 24px;
   }
 
@@ -4159,41 +4132,8 @@ html {
     text-align: center;
   }
 
-  .directory-arrow {
-    grid-column: auto;
-    grid-row: auto;
-    align-self: center;
-    justify-self: stretch;
-    width: 100%;
-    display: grid;
-    place-items: center;
-    padding: 0;
-    margin: 0;
-    font-size: 16px;
-    transform: translateX(-7px);
-    pointer-events: none;
-  }
-
-  .directory-row:hover .directory-arrow {
-    transform: translateX(-7px);
-  }
 }
 
-
-/* HOME DIRECTORY — HIDE ROW ARROWS ON TOUCH TABLETS */
-@media (
-  min-width: 761px
-) and (
-  max-width: 1400px
-) and (
-  hover: none
-) and (
-  pointer: coarse
-) {
-  .directory-arrow {
-    display: none !important;
-  }
-}
 
 /* HOME DIRECTORY — HEADER TOOLTIPS */
 @media (hover: hover) and (pointer: fine) {
@@ -4734,4 +4674,20 @@ html {
   .distribution-health-scale-labels {
     font-size: 10px;
   }
+}
+
+/* HOME DIRECTORY — DISTRIBUTION HEALTH */
+
+.directory-health strong {
+  color: var(--text) !important;
+  font-weight: 750;
+}
+
+.directory-health span {
+  color:
+    var(
+      --directory-health-color,
+      var(--text)
+    ) !important;
+  opacity: 0.86;
 }

@@ -1,6 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import {
+  useMemo,
+  useState,
+  type CSSProperties,
+} from "react";
 import AdaptiveCollectionImage from "@/components/adaptive-collection-image";
 import Link from "next/link";
 import LocalSnapshotTime from "@/components/local-snapshot-time";
@@ -19,7 +23,9 @@ export type CollectionDirectoryItem = {
   singleHolderRate: number;
   averageHolding: number | null;
   giniCoefficient: number | null;
-  top1SupplyShare: number | null;
+  distributionHealthScore: number | null;
+  distributionHealthLabel: string | null;
+  distributionHealthColor: string | null;
 };
 
 type CollectionDirectoryProps = {
@@ -162,9 +168,9 @@ export default function CollectionDirectory({
 
             <span
               className="directory-header-tooltip"
-              data-tooltip="Share of circulating supply held by the largest 1% of holding addresses."
+              data-tooltip="Summarizes observable on-chain distribution using ownership inequality, top-holder concentration, holder breadth and available historical trends. It does not measure collection quality, value or future performance. Open a collection report for the complete calculation."
             >
-              Top 1%
+              Distribution health
             </span>
 
             <span
@@ -273,16 +279,26 @@ export default function CollectionDirectory({
                 </div>
 
                 <div
-                  className="directory-value"
-                  data-label="Top 1%"
+                  className="directory-value directory-health"
+                  data-label="Distribution health"
+                  style={
+                    collection.distributionHealthColor
+                      ? ({
+                          "--directory-health-color":
+                            collection.distributionHealthColor,
+                        } as CSSProperties)
+                      : undefined
+                  }
                 >
                   <strong>
-                    {collection.top1SupplyShare !== null
-                      ? `${collection.top1SupplyShare}%`
-                      : "—"}
+                    {collection.distributionHealthScore ??
+                      "—"}
                   </strong>
 
-                  <span>supply held</span>
+                  <span>
+                    {collection.distributionHealthLabel ??
+                      "Unavailable"}
+                  </span>
                 </div>
 
                 <div
@@ -307,12 +323,6 @@ export default function CollectionDirectory({
                   </span>
                 </div>
 
-                <span
-                  className="directory-arrow"
-                  aria-hidden="true"
-                >
-                  →
-                </span>
               </Link>
             ))}
           </div>
