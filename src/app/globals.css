@@ -4702,3 +4702,24 @@ html {
   white-space: nowrap;
   opacity: 1;
 }
+
+/* HOME DIRECTORY - IPAD LANDSCAPE COMPACTION */
+@media (min-width: 1081px) and (max-width: 1400px) {
+  .directory-table-header,
+  .directory-row {
+    grid-template-columns:
+      minmax(290px, 2fr)
+      minmax(105px, 0.8fr)
+      minmax(110px, 0.82fr)
+      minmax(120px, 0.86fr)
+      minmax(135px, 0.95fr)
+      max-content;
+    column-gap: 20px;
+  }
+
+  .directory-table-header > :nth-child(5),
+  .directory-row > :nth-child(5) {
+    display: none;
+  }
+}
+
