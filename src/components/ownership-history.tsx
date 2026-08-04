@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import DistributionHealthHistory from "@/components/distribution-health-history";
 
 export type OwnershipHistoryPoint = {
   snapshotDate: string;
@@ -8,6 +9,7 @@ export type OwnershipHistoryPoint = {
   blockHeight: number | null;
   holdingAddresses: number;
   singleHolders: number;
+  holderDensity: number | null;
   ownershipEvenness: number | null;
   effectiveHolders: number | null;
   giniCoefficient: number | null;
@@ -964,6 +966,15 @@ export default function OwnershipHistory({
             })}
           </div>
 
+          <DistributionHealthHistory
+            points={sortedPoints}
+            periodDays={activeChartState.days}
+            windowStartDate={
+              activeChartState.windowStartDate ??
+              chartBaselinePoint.snapshotDate
+            }
+          />
+
           <div className="history-chart-grid">
             {chartMetrics.map((metric) => (
               <article
@@ -1038,4 +1049,3 @@ export default function OwnershipHistory({
     </section>
   );
 }
-

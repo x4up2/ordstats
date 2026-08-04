@@ -516,6 +516,8 @@ export default async function CollectionPage({
           historicalHoldingAddresses,
         singleHolders:
           historicalSnapshot.single_holders,
+        holderDensity:
+          historicalSnapshot.ownership_ratio,
         ownershipEvenness:
           historicalEvenness,
         effectiveHolders:
@@ -579,6 +581,8 @@ export default async function CollectionPage({
             ownership.holdingAddresses,
           singleHolders:
             ownership.singleHolders,
+          holderDensity:
+            ownership.ownershipRatio,
           ownershipEvenness,
           effectiveHolders:
             advanced?.effectiveHolders ?? null,
