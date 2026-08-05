@@ -3730,19 +3730,9 @@ a[href^="http://ord.net"]:hover {
     border-color 150ms ease;
 }
 
-.collection-home-link span {
-  font-size: 14px;
-  line-height: 1;
-  transition: transform 150ms ease;
-}
-
 .collection-home-link:hover {
   border-color: var(--text);
   color: var(--text);
-}
-
-.collection-home-link:hover span {
-  transform: translateX(-3px);
 }
 
 

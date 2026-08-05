@@ -136,8 +136,7 @@ export default async function CollectionPage({
             className="collection-home-link"
             href="/"
           >
-            <span aria-hidden="true">←</span>
-            Home
+                        Home
           </Link>
 
           <div className="pending-status">
@@ -643,8 +642,7 @@ export default async function CollectionPage({
           className="collection-home-link"
           href="/"
         >
-          <span aria-hidden="true">←</span>
-          Home
+                    Home
         </Link>
 
         <section className="collection-heading">
