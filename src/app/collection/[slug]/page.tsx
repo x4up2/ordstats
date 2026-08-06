@@ -70,6 +70,9 @@ export async function generateMetadata({
   const socialTitle =
     `${collection.name} — Ordinals ownership analytics`;
 
+  const socialImagePath =
+    `${canonicalPath}/opengraph-image?v=3`;
+
   return {
     title: collection.name,
     description,
@@ -86,10 +89,10 @@ export async function generateMetadata({
       description,
       images: [
         {
-          url: "/ordstats-social-card.png?v=2",
+          url: socialImagePath,
           width: 1200,
           height: 630,
-          alt: socialTitle,
+          alt: `${collection.name} ownership analytics on ORDstats`,
         },
       ],
     },
@@ -99,7 +102,7 @@ export async function generateMetadata({
       title: socialTitle,
       description,
       images: [
-        "/ordstats-social-card.png?v=2",
+        socialImagePath,
       ],
     },
   };
