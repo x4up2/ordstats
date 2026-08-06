@@ -1,5 +1,4 @@
 import { ImageResponse } from "next/og";
-import { headers } from "next/headers";
 import sharp from "sharp";
 
 import {
@@ -26,7 +25,7 @@ export const size = {
 
 export const contentType = "image/png";
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 type OpenGraphImageProps = {
   params: Promise<{
@@ -49,24 +48,8 @@ function humanizeSlug(slug: string) {
 async function getImageDataUrl(
   imageUrl: string | null,
 ) {
-  const requestHeaders = await headers();
-
-  const host =
-    requestHeaders.get("x-forwarded-host") ??
-    requestHeaders.get("host");
-
-  const forwardedProtocol =
-    requestHeaders.get("x-forwarded-proto");
-
-  const protocol =
-    forwardedProtocol ??
-    (host?.startsWith("localhost")
-      ? "http"
-      : "https");
-
-  const baseUrl = host
-    ? `${protocol}://${host}`
-    : "https://www.ordstats.net";
+  const baseUrl =
+    "https://www.ordstats.net";
 
   const candidates = [
     imageUrl,
@@ -90,7 +73,10 @@ async function getImageDataUrl(
       const response = await fetch(
         sourceUrl,
         {
-          cache: "no-store",
+          cache: "force-cache",
+          next: {
+            revalidate: 86400,
+          },
         },
       );
 
