@@ -160,6 +160,43 @@ async function resolveCollectionInscriptionIds(
       await fetchGalleryInscriptionIds(
         collection.id,
       );
+  } else if (collection.type === "multi_gallery") {
+    if (
+      !Array.isArray(collection.ids) ||
+      collection.ids.length === 0
+    ) {
+      throw new Error(
+        "Multi-gallery collection has no valid gallery IDs.",
+      );
+    }
+
+    sourceIds = collection.ids;
+    rawInscriptionIds = [];
+
+    for (
+      let index = 0;
+      index < sourceIds.length;
+      index += 1
+    ) {
+      const galleryId = sourceIds[index];
+
+      console.log(
+        `Reading gallery ${index + 1}/${sourceIds.length}: ` +
+          galleryId,
+      );
+
+      const galleryInscriptionIds =
+        await fetchGalleryInscriptionIds(galleryId);
+
+      console.log(
+        `Gallery ${index + 1}: ` +
+          `${galleryInscriptionIds.length.toLocaleString(
+            "en-US",
+          )} inscription(s)`,
+      );
+
+      rawInscriptionIds.push(...galleryInscriptionIds);
+    }
   } else if (collection.type === "parent") {
     if (
       !Array.isArray(collection.ids) ||

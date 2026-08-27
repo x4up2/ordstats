@@ -125,7 +125,7 @@ export type OwnershipSnapshot = {
 export type PublicCollection = {
   slug: string;
   name: string;
-  collection_type: "gallery" | "parent";
+  collection_type: "gallery" | "multi_gallery" | "parent";
   source_id: string;
   image_url: string | null;
   gallery_supply: number;
