@@ -71,7 +71,7 @@ export async function generateMetadata({
     `${collection.name} — Ordinals ownership analytics`;
 
   const socialImagePath =
-    `${canonicalPath}/opengraph-image?v=4`;
+    `${canonicalPath}/opengraph-image?v=5`;
 
   return {
     title: collection.name,
