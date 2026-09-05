@@ -40,7 +40,7 @@ async function extractCollections(page) {
     (collectionLimit) => {
       const anchors = Array.from(
         document.querySelectorAll(
-          'main a[href*="/collection/"]',
+          'a[href*="/collection/"]',
         ),
       );
 
@@ -242,7 +242,7 @@ async function main() {
   try {
     const context = await browser.newContext({
       viewport: {
-        width: 1440,
+        width: 1920,
         height: 1200,
       },
     });
@@ -278,6 +278,21 @@ async function main() {
           top: document.body.scrollHeight,
           behavior: "instant",
         });
+
+        for (const element of document.querySelectorAll("*")) {
+          const style = getComputedStyle(element);
+
+          if (
+            element.scrollHeight >
+              element.clientHeight + 50 &&
+            ["auto", "scroll"].includes(
+              style.overflowY,
+            )
+          ) {
+            element.scrollTop =
+              element.scrollHeight;
+          }
+        }
       });
 
       await page.waitForTimeout(1_000);
