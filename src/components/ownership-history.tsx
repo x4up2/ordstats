@@ -54,17 +54,17 @@ const chartPeriodOptions = [
   {
     days: 30,
     label: "30 DAYS",
-    requiresFullWindow: false,
+    minimumHistoryDays: 0,
   },
   {
     days: 180,
     label: "6 MONTHS",
-    requiresFullWindow: false,
+    minimumHistoryDays: 0,
   },
   {
     days: 365,
     label: "1 YEAR",
-    requiresFullWindow: true,
+    minimumHistoryDays: 181,
   },
 ] as const;
 
@@ -835,10 +835,10 @@ export default function OwnershipHistory({
           );
 
         const hasRequiredHistory =
-          !period.requiresFullWindow ||
+          period.minimumHistoryDays === 0 ||
           hasFullWindow(
             sortedPoints,
-            period.days,
+            period.minimumHistoryDays,
           );
 
         return {
