@@ -59,7 +59,7 @@ const chartPeriodOptions = [
   {
     days: 180,
     label: "6 MONTHS",
-    requiresFullWindow: true,
+    requiresFullWindow: false,
   },
   {
     days: 365,
