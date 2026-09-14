@@ -70,6 +70,36 @@ async function getCatalogRanking(slug) {
   }
 }
 
+async function getLocalCollectionImageUrl(slug) {
+  const extensions = [
+    "webp",
+    "png",
+    "jpg",
+    "jpeg",
+    "avif",
+  ];
+
+  for (const extension of extensions) {
+    const imagePath = path.resolve(
+      process.cwd(),
+      "public",
+      "collection-images",
+      `${slug}.${extension}`,
+    );
+
+    try {
+      await fs.access(imagePath);
+      return `/collection-images/${slug}.${extension}`;
+    } catch (error) {
+      if (error?.code !== "ENOENT") {
+        throw error;
+      }
+    }
+  }
+
+  return null;
+}
+
 async function main() {
   const snapshotPath = path.join(
     process.cwd(),
@@ -100,11 +130,19 @@ async function main() {
   const catalogRanking =
     await getCatalogRanking(source.collectionSlug);
 
+  const localImageUrl =
+    await getLocalCollectionImageUrl(
+      source.collectionSlug,
+    );
+
   const collectionRow = {
     slug: source.collectionSlug,
     name: source.collectionName,
     collection_type: source.collectionType,
     source_id: source.galleryId,
+    ...(localImageUrl
+      ? { image_url: localImageUrl }
+      : {}),
     gallery_supply: supply.gallery,
     latest_snapshot_at: generatedAt,
     latest_block_height: blockHeight,
