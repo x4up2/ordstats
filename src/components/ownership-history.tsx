@@ -613,6 +613,100 @@ function Sparkline({
     )
     .join(" ");
 
+  const isSixMonthView = periodDays === 180;
+
+  // Smooth only the displayed 6-month curve.
+  // Keep original coordinates for daily tooltips.
+  const displayCoordinates = coordinates.map(
+    (coordinate, index) => {
+      const neighbors = coordinates.slice(
+        Math.max(0, index - 2),
+        Math.min(coordinates.length, index + 3),
+      );
+
+      const averageY =
+        neighbors.reduce(
+          (sum, point) => sum + point.y,
+          0,
+        ) / neighbors.length;
+
+      return {
+        x: coordinate.x,
+        y: averageY,
+      };
+    },
+  );
+
+  // Monotone cubic interpolation:
+  // continuous tangents without artificial peaks.
+  const smoothSlopes = displayCoordinates.map(
+    (point, index) => {
+      const previous = displayCoordinates[index - 1];
+      const next = displayCoordinates[index + 1];
+
+      if (!previous && !next) return 0;
+
+      if (!previous) {
+        return (next.y - point.y) / (next.x - point.x);
+      }
+
+      if (!next) {
+        return (point.y - previous.y) /
+          (point.x - previous.x);
+      }
+
+      const leftWidth = point.x - previous.x;
+      const rightWidth = next.x - point.x;
+
+      if (leftWidth <= 0 || rightWidth <= 0) return 0;
+
+      const leftSlope =
+        (point.y - previous.y) / leftWidth;
+
+      const rightSlope =
+        (next.y - point.y) / rightWidth;
+
+      if (leftSlope * rightSlope <= 0) return 0;
+
+      const leftWeight = 2 * rightWidth + leftWidth;
+      const rightWeight = rightWidth + 2 * leftWidth;
+
+      return (leftWeight + rightWeight) /
+        (leftWeight / leftSlope + rightWeight / rightSlope);
+    },
+  );
+
+  const smoothLinePath = displayCoordinates.reduce(
+    (path, coordinate, index) => {
+      if (index === 0) {
+        return (
+          `M ${coordinate.x.toFixed(2)} ` +
+          `${coordinate.y.toFixed(2)}`
+        );
+      }
+
+      const previous = displayCoordinates[index - 1];
+      const controlDeltaX =
+        (coordinate.x - previous.x) / 3;
+
+      const control1Y =
+        previous.y + controlDeltaX * smoothSlopes[index - 1];
+
+      const control2Y =
+        coordinate.y - controlDeltaX * smoothSlopes[index];
+
+      return (
+        `${path} C ` +
+        `${(previous.x + controlDeltaX).toFixed(2)} ` +
+        `${control1Y.toFixed(2)}, ` +
+        `${(coordinate.x - controlDeltaX).toFixed(2)} ` +
+        `${control2Y.toFixed(2)}, ` +
+        `${coordinate.x.toFixed(2)} ${coordinate.y.toFixed(2)}`
+      );
+    },
+    "",
+  );
+
   const firstCoordinate = coordinates[0];
   const lastCoordinate =
     coordinates[coordinates.length - 1];
@@ -701,13 +795,22 @@ function Sparkline({
 
       <polygon
         className="history-sparkline-area"
+      opacity={isSixMonthView ? 0 : undefined}
         points={areaPoints}
       />
 
+      {isSixMonthView ? (
+      <path
+        className="history-sparkline-line"
+        d={smoothLinePath}
+        fill="none"
+      />
+    ) : (
       <polyline
         className="history-sparkline-line"
         points={linePoints}
       />
+    )}
 
       {coordinates.map((coordinate, index) => {
         const isLatest =
@@ -748,6 +851,7 @@ function Sparkline({
 
             <line
               className={`history-sparkline-point-outline${modifier}`}
+              opacity={isSixMonthView ? 0 : undefined}
               x1={coordinate.x - 0.01}
               y1={coordinate.y}
               x2={coordinate.x + 0.01}
@@ -756,6 +860,7 @@ function Sparkline({
 
             <line
               className={`history-sparkline-point${modifier}`}
+              opacity={isSixMonthView ? 0 : undefined}
               x1={coordinate.x - 0.01}
               y1={coordinate.y}
               x2={coordinate.x + 0.01}

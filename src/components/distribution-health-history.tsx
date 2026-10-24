@@ -236,6 +236,53 @@ export default function DistributionHealthHistory({
     )
     .join(" ");
 
+  const isSixMonthView = periodDays === 180;
+
+  // Smooth only the displayed 6-month curve.
+  // Keep original coordinates for daily tooltips.
+  const displayCoordinates = coordinates.map(
+    (coordinate, index) => {
+      const neighbors = coordinates.slice(
+        Math.max(0, index - 2),
+        Math.min(coordinates.length, index + 3),
+      );
+
+      const averageY =
+        neighbors.reduce(
+          (sum, point) => sum + point.y,
+          0,
+        ) / neighbors.length;
+
+      return {
+        x: coordinate.x,
+        y: averageY,
+      };
+    },
+  );
+
+  const smoothLinePath = displayCoordinates.reduce(
+    (path, coordinate, index) => {
+      if (index === 0) {
+        return (
+          `M ${coordinate.x.toFixed(2)} ` +
+          `${coordinate.y.toFixed(2)}`
+        );
+      }
+
+      const previous = displayCoordinates[index - 1];
+      const controlX =
+        (previous.x + coordinate.x) / 2;
+
+      return (
+        `${path} C ` +
+        `${controlX.toFixed(2)} ${previous.y.toFixed(2)}, ` +
+        `${controlX.toFixed(2)} ${coordinate.y.toFixed(2)}, ` +
+        `${coordinate.x.toFixed(2)} ${coordinate.y.toFixed(2)}`
+      );
+    },
+    "",
+  );
+
   const guides = [
     100,
     75,
@@ -385,10 +432,58 @@ export default function DistributionHealthHistory({
               },
             )}
 
-            <polyline
-              className="history-health-line"
-              points={line}
-            />
+            {isSixMonthView ? (
+              <>
+                <defs>
+                  <linearGradient
+                    id="distribution-health-score-gradient"
+                    gradientUnits="userSpaceOnUse"
+                    x1={padX}
+                    y1={0}
+                    x2={width - padX}
+                    y2={0}
+                  >
+                    {scores.map((point, index) => {
+                      const coordinate =
+                        coordinates[index];
+
+                      const offset =
+                        ((coordinate.x - padX) /
+                          (width - padX * 2)) *
+                        100;
+
+                      return (
+                        <stop
+                          key={point.snapshotDate}
+                          offset={`${Math.max(
+                            0,
+                            Math.min(100, offset),
+                          )}%`}
+                          stopColor={getDistributionHealthColor(
+                            point.rawScore,
+                          )}
+                        />
+                      );
+                    })}
+                  </linearGradient>
+                </defs>
+
+                <path
+                  className="history-health-line"
+                  d={smoothLinePath}
+                  fill="none"
+                  style={{
+                    stroke:
+                      "url(#distribution-health-score-gradient)",
+                  }}
+                />
+              </>
+            ) : (
+              <polyline
+                className="history-health-line"
+                points={line}
+              />
+            )}
 
             {coordinates.map(
               (
@@ -444,6 +539,7 @@ export default function DistributionHealthHistory({
 
                     <line
                       className={`history-health-outline${modifier}`}
+                    opacity={isSixMonthView ? 0 : undefined}
                       x1={
                         coordinate.x -
                         0.01
@@ -462,6 +558,7 @@ export default function DistributionHealthHistory({
 
                     <line
                       className={`history-health-point${modifier}`}
+                    opacity={isSixMonthView ? 0 : undefined}
                       x1={
                         coordinate.x -
                         0.01
