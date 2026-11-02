@@ -272,7 +272,6 @@ async function main() {
     );
   }
 
-  await checkOrdServer();
 
   const supabase = createSupabaseClient();
   const indexedSlugs = await getIndexedSlugs(supabase);
@@ -306,6 +305,8 @@ async function main() {
   console.log(
     `Retry failed only: ${options.retryFailed}`,
   );
+
+  let ordServerChecked = false;
 
   const results = {
     indexed: [],
@@ -347,6 +348,11 @@ async function main() {
       results.skipped.push(collection.slug);
       await saveState(state);
       continue;
+    }
+
+    if (!ordServerChecked) {
+      await checkOrdServer();
+      ordServerChecked = true;
     }
 
     const startedAt = new Date();
